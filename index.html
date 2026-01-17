@@ -2,245 +2,254 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-  <title>EyeSoar - Advanced Vision Training</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EyeSoar - Advanced Vision Training (Pro)</title>
+
+  <!-- JRPG-style fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="root">
-    <!-- FF7-Style Black Spotlight Start Screen -->
-    <div id="splash-screen" class="screen active">
-      <div class="spotlight-container">
-        <div class="spotlight"></div>
-        <div class="sword-icon">⚔️</div>
-        <div class="sword-shadow"></div>
-        <button class="start-btn" id="splash-start">Start</button>
-      </div>
-    </div>
 
-    <!-- Main Menu Screen -->
-    <div id="main-menu-screen" class="screen">
-      <div class="screen-container">
-        <h1 class="screen-title jrpg">EyeSoar</h1>
-        <div class="menu-list">
-          <button class="menu-item" id="menu-time-attack"><span class="menu-icon">⏱️</span><span class="menu-text">Time Attack</span></button>
-          <button class="menu-item" id="menu-infinite"><span class="menu-icon">♾️</span><span class="menu-text">Infinite Struggle</span></button>
-          <button class="menu-item" id="menu-quest"><span class="menu-icon">🗡️</span><span class="menu-text">Quest Mode</span></button>
-          <button class="menu-item" id="menu-hero-roster"><span class="menu-icon">👥</span><span class="menu-text">Hero Roster</span></button>
-          <button class="menu-item" id="menu-settings"><span class="menu-icon">⚙️</span><span class="menu-text">Settings</span></button>
+    <!-- Start Screen / Mode Selector -->
+    <div id="start-screen" class="panel">
+      <h1 class="title jrpg">EyeSoar</h1>
+
+      <div class="menu">
+        <button class="menu-btn" id="mode-time">Time Attack (1 minute)</button>
+        <button class="menu-btn ghost" id="time-attack-customize">⚙️ Customize Time Attack</button>
+        <button class="menu-btn" id="mode-infinite">Infinite Struggle</button>
+        <button class="menu-btn" id="mode-quest">Quest Mode</button>
+        <button class="menu-btn ghost hidden" id="mode-quest-continue">Continue Quest</button>
+
+        <div class="menu-row">
+          <button class="menu-btn ghost" id="open-settings">Settings</button>
+          <button class="menu-btn ghost" id="phone-toggle">Phone Screen: Off</button>
         </div>
+
         <div class="highscores">
-          <div>Time Attack Record: <span id="hs-time">—</span></div>
-          <div>Infinite Best Avg: <span id="hs-infinite">—</span></div>
+          <div>High Score (Time Attack): <span id="hs-time">—</span></div>
+          <div>High Score (Infinite best avg): <span id="hs-infinite">—</span></div>
         </div>
+      </div>
+
+      <footer class="hint">Tip: Patches are extremely subtle. Earliest clicks reward the most.</footer>
+    </div>
+
+    <!-- Time Attack Customization Panel -->
+    <div id="time-attack-panel" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="time-attack-title">
+      <h2 id="time-attack-title" class="jrpg">Time Attack Customization</h2>
+      
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+        Choose which challenges to face:
+      </p>
+
+      <div class="form-grid">
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-normal" checked />
+          <span>Normal Patches (standard fade-in)</span>
+        </label>
+
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-faders" checked />
+          <span>Fader Patches (fade in & out)</span>
+        </label>
+
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-drifters" checked />
+          <span>Drifter Patches (moving targets)</span>
+        </label>
+        
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-shrinking" checked />
+          <span>Shrinking Patches (size variance)</span>
+        </label>
+
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-lines" />
+          <span>Dark Tendrils (hard-to-see lines)</span>
+        </label>
+        
+        <label class="field checkbox-field">
+          <input type="checkbox" id="ta-edge-creepers" />
+          <span>Edge Creepers (peripheral threats)</span>
+        </label>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn" id="ta-save">Save & Close</button>
+        <button class="btn ghost" id="ta-cancel">Cancel</button>
       </div>
     </div>
 
-    <!-- Settings Screen -->
-    <div id="settings-screen" class="screen">
-      <div class="screen-container">
-        <h2 class="screen-title jrpg">Settings</h2>
-        <div class="settings-content scrollable">
-          <div class="setting-group">
-            <h3 class="group-title">Display</h3>
-            <label class="setting-row"><span class="setting-label">Full Screen Game Area</span><input type="checkbox" id="setting-fullscreen" class="toggle-switch" /></label>
-            <label class="setting-row"><span class="setting-label">Background Color</span><input id="setting-bg-color" type="color" value="#a6a6a6" /></label>
-          </div>
-          <div class="setting-group">
-            <h3 class="group-title">Gabor Patch</h3>
-            <label class="setting-row"><span class="setting-label">Patch Type</span><select id="setting-patch-type" class="select-input"><option value="gabor">Gabor Patch</option><option value="circle">Solid Circle</option></select></label>
-            <label class="setting-row slider-row"><span class="setting-label">Patch Size</span><div class="slider-container"><input id="setting-patch-size" type="range" min="28" max="200" step="2" value="88" /><span class="slider-value" id="setting-patch-size-val">88px</span></div></label>
-            <label class="setting-row slider-row"><span class="setting-label">Brightness</span><div class="slider-container"><input id="setting-brightness" type="range" min="0.2" max="1.6" step="0.01" value="1" /><span class="slider-value" id="setting-brightness-val">1.00</span></div></label>
-            <label class="setting-row slider-row"><span class="setting-label">Wavelength λ</span><div class="slider-container"><input id="setting-lambda" type="range" min="4" max="64" step="1" value="12" /><span class="slider-value" id="setting-lambda-val">12px</span></div></label>
-            <label class="setting-row slider-row"><span class="setting-label">Contrast</span><div class="slider-container"><input id="setting-contrast" type="range" min="0.02" max="1.0" step="0.01" value="0.18" /><span class="slider-value" id="setting-contrast-val">0.18</span></div></label>
-            <label class="setting-row slider-row"><span class="setting-label">Gaussian σ</span><div class="slider-container"><input id="setting-sigma" type="range" min="6" max="120" step="1" value="30" /><span class="slider-value" id="setting-sigma-val">30px</span></div></label>
-            <label class="setting-row"><span class="setting-label">Segmentation</span><select id="setting-segmentation" class="select-input"><option value="0">None</option><option value="4">4-level</option><option value="5">5-level</option><option value="6">6-level</option><option value="8">8-level</option></select></label>
-          </div>
-          <div class="setting-group">
-            <h3 class="group-title">Gameplay</h3>
-            <label class="setting-row slider-row"><span class="setting-label">Spawn Frequency</span><div class="slider-container"><input id="setting-spawn-secs" type="range" min="0.3" max="4" step="0.05" value="1.2" /><span class="slider-value" id="setting-spawn-secs-val">1.20s</span></div></label>
-            <label class="setting-row"><span class="setting-label">Miss Penalty</span><input id="setting-miss-penalty" type="number" min="0" max="1000" step="1" value="50" class="number-input" /></label>
-          </div>
-          <div class="setting-group">
-            <h3 class="group-title">Audio</h3>
-            <label class="setting-row"><span class="setting-label">Music Enabled</span><input type="checkbox" id="setting-music-enabled" class="toggle-switch" checked /></label>
-            <label class="setting-row slider-row"><span class="setting-label">Music Volume</span><div class="slider-container"><input id="setting-music-vol" type="range" min="0" max="1" step="0.01" value="0.45" /><span class="slider-value" id="setting-music-vol-val">0.45</span></div></label>
-          </div>
-        </div>
-        <div class="screen-actions">
-          <button class="action-btn primary" id="settings-save">Save</button>
-          <button class="action-btn" id="settings-cancel">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Time Attack Settings Screen -->
-    <div id="time-attack-settings-screen" class="screen">
-      <div class="screen-container">
-        <h2 class="screen-title jrpg">Time Attack Settings</h2>
-        <div class="settings-content scrollable">
-          <div class="setting-group">
-            <h3 class="group-title">Enemy Selection</h3>
-            <label class="setting-row checkbox-row"><input type="checkbox" id="ta-progressive" class="checkbox-input" /><span class="setting-label">Progressive Evolution (Auto)</span></label>
-            <div class="enemy-checkboxes" id="ta-enemy-list">
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-normal-patches" class="checkbox-input enemy-checkbox" checked /><span class="setting-label">Normal Gabor Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-faders" class="checkbox-input enemy-checkbox" /><span class="setting-label">Fader Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-drifters" class="checkbox-input enemy-checkbox" /><span class="setting-label">Drifter Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-shrinking" class="checkbox-input enemy-checkbox" /><span class="setting-label">Shrinking Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-tendrils-straight" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Straight)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-tendrils-zigzag" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Zig-Zag)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-tendrils-wave" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Wave)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="ta-edge-crawlers" class="checkbox-input enemy-checkbox" /><span class="setting-label">Edge Crawlers</span></label>
-            </div>
-          </div>
-        </div>
-        <div class="screen-actions">
-          <button class="action-btn primary" id="ta-settings-save">Save & Start</button>
-          <button class="action-btn" id="ta-settings-cancel">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Infinite Settings Screen -->
-    <div id="infinite-settings-screen" class="screen">
-      <div class="screen-container">
-        <h2 class="screen-title jrpg">Infinite Struggle Settings</h2>
-        <div class="settings-content scrollable">
-          <div class="setting-group">
-            <h3 class="group-title">Enemy Selection</h3>
-            <label class="setting-row checkbox-row"><input type="checkbox" id="inf-progressive" class="checkbox-input" checked /><span class="setting-label">Progressive Evolution (Auto)</span></label>
-            <div class="enemy-checkboxes" id="inf-enemy-list">
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-normal-patches" class="checkbox-input enemy-checkbox" checked /><span class="setting-label">Normal Gabor Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-faders" class="checkbox-input enemy-checkbox" /><span class="setting-label">Fader Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-drifters" class="checkbox-input enemy-checkbox" /><span class="setting-label">Drifter Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-shrinking" class="checkbox-input enemy-checkbox" /><span class="setting-label">Shrinking Patches</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-tendrils-straight" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Straight)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-tendrils-zigzag" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Zig-Zag)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-tendrils-wave" class="checkbox-input enemy-checkbox" /><span class="setting-label">Dark Tendrils (Wave)</span></label>
-              <label class="setting-row checkbox-row"><input type="checkbox" id="inf-edge-crawlers" class="checkbox-input enemy-checkbox" /><span class="setting-label">Edge Crawlers</span></label>
-            </div>
-          </div>
-        </div>
-        <div class="screen-actions">
-          <button class="action-btn primary" id="inf-settings-save">Save & Start</button>
-          <button class="action-btn" id="inf-settings-cancel">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hero Roster Screen -->
-    <div id="hero-roster-screen" class="screen">
-      <div class="screen-container">
-        <h2 class="screen-title jrpg">Hero Roster</h2>
-        <div class="roster-content scrollable">
-          <div class="roster-section">
-            <h3 class="section-title">Active Party</h3>
-            <div class="hero-grid" id="active-party-grid"></div>
-          </div>
-          <div class="roster-section">
-            <h3 class="section-title">Available Heroes</h3>
-            <div class="hero-grid" id="available-heroes-grid"></div>
-          </div>
-          <div class="roster-section">
-            <h3 class="section-title">MIA / Lost</h3>
-            <div class="hero-grid" id="mia-heroes-grid"></div>
-          </div>
-          <div class="roster-section">
-            <h3 class="section-title">Dearly Departed</h3>
-            <div class="hero-grid" id="departed-heroes-grid"></div>
-          </div>
-        </div>
-        <div class="screen-actions">
-          <button class="action-btn" id="roster-exit">Exit</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Game Container -->
+    <!-- Game Container (full window by default) -->
     <div id="game-shell" class="hidden">
-      <div class="game-wrapper">
-        <header class="game-header">
-          <div class="header-left">
-            <div class="game-mode-label" id="game-mode">Mode: —</div>
+
+      <header class="topbar jrpg" role="banner" aria-label="Game status">
+        <div class="left">
+          <div class="brand">EyeSoar</div>
+          <div class="mode" id="current-mode">Mode: —</div>
+        </div>
+
+        <div class="stats" aria-live="polite">
+          <div class="stat stat-large">Score <div class="stat-value" id="score">0</div></div>
+          <div class="stat">Avg <div class="stat-value small" id="avg">0.00</div></div>
+          <div class="stat">Hits <div class="stat-value small" id="hits">0</div></div>
+          <div class="stat">Misses <div class="stat-value small" id="misses">0</div></div>
+          <div class="stat">Earliest <div class="stat-value small" id="earliest">0</div></div>
+          <div class="stat time" id="time-left" aria-hidden="true"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="pause-resume">Pause</button>
+          <button class="btn ghost" id="back-to-menu">Menu</button>
+          <button class="btn ghost" id="settings-in-game">Settings</button>
+          <button class="btn ghost" id="quest-panel-toggle">Objectives: On</button>
+        </div>
+      </header>
+
+      <!-- Game Arena -->
+      <main id="game-area" tabindex="0" aria-label="Game play area"></main>
+      <div id="speech-layer" aria-live="polite" aria-atomic="true"></div>
+      <div id="quest-panel" class="hidden" aria-live="polite">
+        <div class="qp-title">Quest Objectives</div>
+        <ul id="quest-objectives"></ul>
+      </div>
+      
+      <!-- Party members display (peripheral) -->
+      <div id="party-container" aria-label="Party members"></div>
+
+      <div id="game-toast" aria-hidden="true" class="toast-area"></div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <h2 id="settings-title" class="jrpg">Settings</h2>
+
+      <div class="form-grid">
+
+        <label class="field">
+          Spot Type
+          <select id="patch-type">
+            <option value="gabor" selected>Gabor Patch</option>
+            <option value="circle">Solid Circle</option>
+          </select>
+        </label>
+
+        <label class="field">
+          Spawn Frequency (seconds between spawns)
+          <input id="spawn-secs" type="range" min="0.3" max="4" step="0.05" value="1.2" />
+          <div class="meta"><span id="spawn-secs-val">1.20</span> s</div>
+        </label>
+
+        <label class="field">
+          Patch Size (px)
+          <input id="patch-size" type="range" min="28" max="200" step="2" value="88" />
+          <div class="meta"><span id="patch-size-val">88</span> px</div>
+        </label>
+
+        <label class="field">
+          Background color (patches auto-match mean luminance)
+          <input id="bg-color" type="color" value="#a6a6a6" />
+        </label>
+
+        <label class="field">
+          Brightness multiplier (patch intensity relative to background)
+          <input id="brightness" type="range" min="0.2" max="1.6" step="0.01" value="1" />
+          <div class="meta"><span id="brightness-val">1.00</span></div>
+        </label>
+
+        <label class="field">
+          Miss penalty (points)
+          <input id="miss-penalty" type="number" min="0" max="1000" step="1" value="50" />
+        </label>
+
+        <!-- Music controls -->
+        <label class="field">
+          Music
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="music-toggle" type="checkbox" checked />
+            <span class="meta" style="margin-left:6px;color:var(--muted)">Enable background music</span>
           </div>
-          <div class="header-stats" id="game-stats">
-            <div class="stat-item"><span class="stat-label">Score</span><span class="stat-value" id="stat-score">0</span></div>
-            <div class="stat-item"><span class="stat-label">Avg</span><span class="stat-value" id="stat-avg">0.00</span></div>
-            <div class="stat-item"><span class="stat-label">Hits</span><span class="stat-value" id="stat-hits">0</span></div>
-            <div class="stat-item"><span class="stat-label">Misses</span><span class="stat-value" id="stat-misses">0</span></div>
-            <div class="stat-item time-stat" id="time-stat-item" style="display:none;"><span class="stat-label">Time</span><span class="stat-value" id="stat-time">60s</span></div>
-          </div>
-          <div class="header-controls">
-            <button class="header-btn" id="game-pause">Pause</button>
-            <button class="header-btn secondary" id="game-menu">Menu</button>
-          </div>
-        </header>
-        <div id="game-area" class="game-area"></div>
-        <div id="speech-layer" class="speech-layer"></div>
-        <div id="quest-objectives-panel" class="quest-panel hidden"></div>
-        <div id="party-display" class="party-display"></div>
+        </label>
+        <label class="field">
+          Music volume
+          <input id="music-vol" type="range" min="0" max="1" step="0.01" value="0.45" />
+          <div class="meta"><span id="music-vol-val">0.45</span></div>
+        </label>
+
+        <!-- Gabor-specific -->
+        <fieldset class="fieldset">
+          <legend>Gabor parameters (scientific defaults, adjustable)</legend>
+
+          <label class="field small">
+            Wavelength λ (px)
+            <input id="lambda" type="range" min="4" max="64" step="1" value="12" />
+            <div class="meta"><span id="lambda-val">12</span> px</div>
+          </label>
+
+          <label class="field small">
+            Orientation jitter (deg)
+            <input id="orient-jitter" type="range" min="0" max="90" step="5" value="30" />
+            <div class="meta"><span id="orient-jitter-val">30</span>°</div>
+          </label>
+
+          <label class="field small">
+            Contrast (Michelson-style, 0-1)
+            <input id="contrast" type="range" min="0.02" max="1.0" step="0.01" value="0.18" />
+            <div class="meta"><span id="contrast-val">0.18</span></div>
+          </label>
+
+          <label class="field small">
+            Gaussian σ (px)
+            <input id="sigma" type="range" min="6" max="120" step="1" value="30" />
+            <div class="meta"><span id="sigma-val">30</span> px</div>
+          </label>
+
+          <label class="field small">
+            Segmentation variety
+            <select id="segmentation">
+              <option value="0">None (scientific default)</option>
+              <option value="4">4-level</option>
+              <option value="5">5-level</option>
+              <option value="6">6-level</option>
+              <option value="8">8-level</option>
+            </select>
+          </label>
+        </fieldset>
+
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn" id="settings-save">Save</button>
+        <button class="btn ghost" id="settings-cancel">Cancel</button>
+        <button class="btn ghost" id="quest-reset" title="Clear quest progress and start a new quest">Reset Quest</button>
+        <button class="btn ghost" id="settings-reset" title="Reset all settings to default values">Reset to Defaults</button>
       </div>
     </div>
 
-    <!-- Pause Screen -->
-    <div id="pause-screen" class="screen">
-      <div class="screen-container pause-container">
-        <h2 class="screen-title jrpg">Paused</h2>
-        <div class="vision-tip-box">
-          <div class="tip-icon">👁️</div>
-          <div class="tip-title">Vision Health Tip</div>
-          <div class="tip-text" id="vision-tip-text">Loading...</div>
-        </div>
-        <div class="pause-stats">
-          <div class="pause-stat"><span class="pause-stat-label">Score</span><span class="pause-stat-value" id="pause-score">0</span></div>
-          <div class="pause-stat"><span class="pause-stat-label">Hits</span><span class="pause-stat-value" id="pause-hits">0</span></div>
-          <div class="pause-stat"><span class="pause-stat-label">Average</span><span class="pause-stat-value" id="pause-avg">0.00</span></div>
-        </div>
-        <div class="screen-actions">
-          <button class="action-btn primary" id="pause-resume">Resume</button>
-          <button class="action-btn" id="pause-menu">Main Menu</button>
-        </div>
+    <!-- End screen -->
+    <div id="end-screen" class="panel hidden">
+      <h2 class="jrpg">Results</h2>
+      <div class="results">
+        <div>Score: <span id="end-score">0</span></div>
+        <div>Avg points / hit: <span id="end-avg">0.00</span></div>
+        <div>Earliest hit: <span id="end-earliest">0</span></div>
+        <div>Hits: <span id="end-hits">0</span></div>
+        <div>Misses: <span id="end-misses">0</span></div>
+        <div id="end-extra"></div>
+      </div>
+
+      <div class="menu-row">
+        <button class="menu-btn" id="end-retry">Play Again</button>
+        <button class="menu-btn ghost" id="end-menu">Main Menu</button>
       </div>
     </div>
 
-    <!-- Hero Detail Modal -->
-    <div id="hero-modal" class="modal">
-      <div class="modal-backdrop"></div>
-      <div class="modal-content hero-detail-modal">
-        <div class="modal-header">
-          <h3 class="modal-title" id="hero-name">Hero Name</h3>
-          <button class="modal-close" id="hero-modal-close">×</button>
-        </div>
-        <div class="modal-body scrollable" id="hero-detail-body"></div>
-      </div>
-    </div>
-
-    <!-- Mission Briefing Modal -->
-    <div id="mission-briefing-modal" class="modal">
-      <div class="modal-backdrop"></div>
-      <div class="modal-content mission-modal">
-        <div class="modal-body scrollable" id="mission-briefing-body"></div>
-        <div class="modal-actions">
-          <button class="action-btn primary" id="mission-start">Deploy</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Carnage Report Modal -->
-    <div id="carnage-report-modal" class="modal">
-      <div class="modal-backdrop"></div>
-      <div class="modal-content carnage-modal">
-        <div class="modal-header">
-          <h3 class="modal-title jrpg">Post-Battle Carnage Report</h3>
-        </div>
-        <div class="modal-body scrollable" id="carnage-report-body"></div>
-        <div class="modal-actions">
-          <button class="action-btn primary" id="carnage-continue">Continue</button>
-        </div>
-      </div>
-    </div>
   </div>
+
   <script src="app.js" defer></script>
 </body>
 </html>
