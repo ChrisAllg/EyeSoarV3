@@ -93,13 +93,33 @@
   const timeAttackCustomizeBtn = document.getElementById('time-attack-customize');
   const timeAttackPanel = document.getElementById('time-attack-panel');
   const taNormalCheck = document.getElementById('ta-normal');
-  const taFadersCheck = document.getElementById('ta-faders');
   const taDriftersCheck = document.getElementById('ta-drifters');
   const taLinesCheck = document.getElementById('ta-lines');
   const taShrinkingCheck = document.getElementById('ta-shrinking');
-  const taEdgeCreepersCheck = document.getElementById('ta-edge-creepers');
+  const taEdgeCreepersCheck = document.getElementById('ta-edge-stalkers');
+  const taRandomCheck = document.getElementById('ta-random');
+  const taTimeLimitInput = document.getElementById('ta-time-limit');
+  const taTimeLimitVal = document.getElementById('ta-time-limit-val');
+  const timeAttackDurationSpan = document.getElementById('time-attack-duration');
   const taSaveBtn = document.getElementById('ta-save');
   const taCancelBtn = document.getElementById('ta-cancel');
+
+  // Infinite Struggle customization panel
+  const infiniteCustomizeBtn = document.getElementById('infinite-customize');
+  const infinitePanel = document.getElementById('infinite-panel');
+  const infAutoEvolveCheck = document.getElementById('inf-auto-evolve');
+  const infNormalCheck = document.getElementById('inf-normal');
+  const infDriftersCheck = document.getElementById('inf-drifters');
+  const infLinesCheck = document.getElementById('inf-lines');
+  const infShrinkingCheck = document.getElementById('inf-shrinking');
+  const infEdgeCreepersCheck = document.getElementById('inf-edge-stalkers');
+  const infSaveBtn = document.getElementById('inf-save');
+  const infCancelBtn = document.getElementById('inf-cancel');
+
+  // Side Quests
+  const sideQuestsPanel = document.getElementById('side-quests-panel');
+  const sqMissionsEl = document.getElementById('sq-missions');
+  const sqTimerEl = document.getElementById('sq-timer');
 
   // WebAudio
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -304,7 +324,7 @@
     splash.stop(now + 0.3);
   }
 
-  // Edge Creeper hit sound: Wet, squishy slime defeat
+  // Edge Stalker hit sound: Wet, squishy slime defeat
   function playEdgeCreeperHitSound() {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
@@ -358,6 +378,100 @@
     splashGain.connect(audioCtx.destination);
     splash.start(now + 0.08);
     splash.stop(now + 0.26);
+  }
+
+  // Edge Stalker spawn sound: Very subtle, organic slime emergence
+  function playEdgeCreeperSpawnSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    
+    // Add variance for natural variation
+    const variance = 0.9 + Math.random() * 0.2; // 0.9-1.1x pitch variance
+    
+    // Extremely subtle low bubble/gurgle (slime emerging)
+    const bubble = audioCtx.createOscillator();
+    const bubbleGain = audioCtx.createGain();
+    const bubbleFilter = audioCtx.createBiquadFilter();
+    bubble.type = 'sine';
+    bubble.frequency.setValueAtTime(80 * variance, now);
+    bubble.frequency.exponentialRampToValueAtTime(120 * variance, now + 0.15);
+    bubbleFilter.type = 'lowpass';
+    bubbleFilter.frequency.setValueAtTime(300, now);
+    bubbleFilter.Q.value = 2;
+    bubbleGain.gain.setValueAtTime(0.0001, now);
+    bubbleGain.gain.exponentialRampToValueAtTime(0.05, now + 0.05); // Very quiet
+    bubbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+    bubble.connect(bubbleFilter);
+    bubbleFilter.connect(bubbleGain);
+    bubbleGain.connect(audioCtx.destination);
+    bubble.start(now);
+    bubble.stop(now + 0.35);
+    
+    // Subtle wet texture (slime surface tension)
+    const texture = audioCtx.createOscillator();
+    const textureGain = audioCtx.createGain();
+    const textureFilter = audioCtx.createBiquadFilter();
+    texture.type = 'triangle';
+    texture.frequency.setValueAtTime(200 * variance, now + 0.08);
+    texture.frequency.exponentialRampToValueAtTime(150 * variance, now + 0.25);
+    textureFilter.type = 'bandpass';
+    textureFilter.frequency.setValueAtTime(250, now);
+    textureFilter.Q.value = 4;
+    textureGain.gain.setValueAtTime(0.0001, now + 0.08);
+    textureGain.gain.exponentialRampToValueAtTime(0.04, now + 0.12); // Very subtle
+    textureGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    texture.connect(textureFilter);
+    textureFilter.connect(textureGain);
+    textureGain.connect(audioCtx.destination);
+    texture.start(now + 0.08);
+    texture.stop(now + 0.3);
+  }
+
+  function playTendrilSpawnSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    
+    // Add variance for natural variation
+    const variance = 0.9 + Math.random() * 0.2; // 0.9-1.1x pitch variance
+    
+    // Subtle whisper/wisp sound (tendril growing from darkness)
+    const whisper = audioCtx.createOscillator();
+    const whisperGain = audioCtx.createGain();
+    const whisperFilter = audioCtx.createBiquadFilter();
+    whisper.type = 'sine';
+    whisper.frequency.setValueAtTime(120 * variance, now);
+    whisper.frequency.exponentialRampToValueAtTime(180 * variance, now + 0.2);
+    whisper.frequency.exponentialRampToValueAtTime(100 * variance, now + 0.4);
+    whisperFilter.type = 'highpass';
+    whisperFilter.frequency.setValueAtTime(150, now);
+    whisperFilter.Q.value = 1;
+    whisperGain.gain.setValueAtTime(0.0001, now);
+    whisperGain.gain.exponentialRampToValueAtTime(0.03, now + 0.1); // Very quiet
+    whisperGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+    whisper.connect(whisperFilter);
+    whisperFilter.connect(whisperGain);
+    whisperGain.connect(audioCtx.destination);
+    whisper.start(now);
+    whisper.stop(now + 0.5);
+    
+    // Subtle rustling (tendril moving through space)
+    const rustle = audioCtx.createOscillator();
+    const rustleGain = audioCtx.createGain();
+    const rustleFilter = audioCtx.createBiquadFilter();
+    rustle.type = 'sawtooth';
+    rustle.frequency.setValueAtTime(60 * variance, now + 0.1);
+    rustle.frequency.exponentialRampToValueAtTime(90 * variance, now + 0.35);
+    rustleFilter.type = 'lowpass';
+    rustleFilter.frequency.setValueAtTime(200, now);
+    rustleFilter.Q.value = 3;
+    rustleGain.gain.setValueAtTime(0.0001, now + 0.1);
+    rustleGain.gain.exponentialRampToValueAtTime(0.02, now + 0.15); // Very subtle
+    rustleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    rustle.connect(rustleFilter);
+    rustleFilter.connect(rustleGain);
+    rustleGain.connect(audioCtx.destination);
+    rustle.start(now + 0.1);
+    rustle.stop(now + 0.45);
   }
 
   // Music functions (longer Time Attack loop, single start per mode)
@@ -694,32 +808,58 @@
   // Quest state
   let questState = null; // { level, story, objectives: [{id, text, done, type, target}], started }
 
-  let phoneMode = false;
+  // Phone mode is now DEFAULT (easier for most users), can toggle to fullscreen
+  let phoneMode = true;
   const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
     (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-  
-  if (isMobileDevice) phoneMode = true;
 
   // Line obstacles state
   let lineObstacles = [];
   let lineSpawnTimer = null;
   
-  // Edge Creeper state
-  let edgeCreepers = [];
+  // Edge Stalker state
+  let edgeStalkers = [];
   let edgeCreepSpawnTimer = null;
   
-  // EDGE CREEPER DEBUG MODE (set to true to make them visible during development)
-  const EDGE_CREEPER_DEBUG = false; // Set to true to see bright red creepers with logging
-  
-  // TENDRIL DEBUG MODE (set to true to visualize paths and hit testing)
-  const TENDRIL_DEBUG = false; // Set to true for bright colored tendrils with debug overlays
-  
-  // ENEMY SELECTION AUDIT MODE (set to true to verify correct enemy spawning)
-  const ENEMY_AUDIT_MODE = false; // Set to true to see spawn logs and visual verification
+  // DEBUG MODE (toggle to make ALL enemies visible during development)
+  let DEBUG_MODE = false; // Toggle with button in main menu
   
   // Parallel party event system
   let partyEventTimer = null;
   let consecutiveMisses = 0;
+  
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // SIDE QUESTS SYSTEM
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const SIDE_QUEST_DURATION = 30000; // 30 seconds to complete all quests
+  let sideQuestsActive = [];
+  let sideQuestTimer = null;
+  let sideQuestTimeRemaining = 0;
+  let sideQuestStartTime = 0;
+  let rapidHitsWindow = []; // Track recent hits for rapid-fire quests
+  
+  // Side quest definitions (20 distinct missions)
+  const SIDE_QUEST_POOL = [
+    {id: 'rapid-5', icon: '⚡', text: 'Get 5 hits within 3 seconds', check: () => rapidHitsWindow.length >= 5},
+    {id: 'rapid-7', icon: '⚡⚡', text: 'Get 7 hits within 3 seconds', check: () => rapidHitsWindow.length >= 7},
+    {id: 'high-value-30', icon: '💎', text: 'Get a hit worth 30+ points', check: () => false, onHit: (pts) => pts >= 30},
+    {id: 'high-value-40', icon: '💎💎', text: 'Get a hit worth 40+ points', check: () => false, onHit: (pts) => pts >= 40},
+    {id: 'no-miss-15s', icon: '🛡️', text: 'No misses for 15 seconds', check: () => false, duration: 15000},
+    {id: 'no-miss-20s', icon: '🛡️🛡️', text: 'No misses for 20 seconds', check: () => false, duration: 20000},
+    {id: 'score-streak', icon: '🎯', text: 'Gain 150 score in 5 seconds', check: () => false, scoreGoal: 150, window: 5000},
+    {id: 'score-streak-big', icon: '🎯🎯', text: 'Gain 250 score in 8 seconds', check: () => false, scoreGoal: 250, window: 8000},
+    {id: 'early-3', icon: '👁️', text: 'Get 3 "earliest" hits in a row', check: () => false, needEarliestStreak: 3},
+    {id: 'early-5', icon: '👁️👁️', text: 'Get 5 "earliest" hits in a row', check: () => false, needEarliestStreak: 5},
+    {id: 'tendril-2', icon: '⚡', text: 'Defeat 2 Tendrils', check: () => false, needTendrilKills: 2},
+    {id: 'tendril-3', icon: '⚡⚡', text: 'Defeat 3 Tendrils', check: () => false, needTendrilKills: 3},
+    {id: 'edge-creep-2', icon: '🐛', text: 'Defeat 2 Edge Stalkers', check: () => false, needEdgeCreepKills: 2},
+    {id: 'edge-creep-3', icon: '🐛🐛', text: 'Defeat 3 Edge Stalkers', check: () => false, needEdgeCreepKills: 3},
+    {id: 'drifter-5', icon: '💨', text: 'Defeat 5 Drifters', check: () => false, needDrifterKills: 5},
+    {id: 'perfect-10', icon: '⭐', text: 'Get 10 hits without missing', check: () => false, needHitStreak: 10},
+    {id: 'perfect-15', icon: '⭐⭐', text: 'Get 15 hits without missing', check: () => false, needHitStreak: 15},
+    {id: 'combo-20', icon: '🔥', text: 'Reach a 20-hit combo', check: () => consecutiveHits >= 20},
+    {id: 'combo-30', icon: '🔥🔥', text: 'Reach a 30-hit combo', check: () => consecutiveHits >= 30},
+  ];
   
   // Party system state
   let party = []; // Active combat party
@@ -754,14 +894,10 @@
     musicEnabled: true,
     musicVolume: 0.45,
     level: 1,
-    faderEnabled: false,
-    faderMinVis: 25,
-    faderMaxVis: 35,
-    faderFraction: 0.0,
     lineObstaclesEnabled: false,
     linePenalty: 100,
     lineSpawnIntervalSecs: 8,
-    edgeCreepersEnabled: false,
+    edgeStalkersEnabled: false,
     edgeCreepPenalty: 200,
     edgeCreepDamage: 50,
     pointRange: '50-0', // 50-0, 60-10, 70-20, 80-30, 90-40, 100-50
@@ -769,19 +905,19 @@
     sessionStats: { totalScore: 0, totalHits: 0, totalMisses: 0, bestAvg: 0 },
     timeAttackSettings: {
       normalPatches: true,
-      faders: true,
       drifters: true,
       lines: false,
       shrinking: true,
-      edgeCreepers: false,
+      edgeStalkers: false,
+      random: false, // Random enemy selection
+      timeLimit: 1, // Time limit in minutes (1-10)
     },
     infiniteSettings: {
       normalPatches: false,
-      faders: false,
       drifters: false,
       shrinking: false,
       lines: false,
-      edgeCreepers: false,
+      edgeStalkers: false,
       autoEvolve: false, // DEFAULT: Manual selection (Progressive is opt-in)
     },
   };
@@ -953,26 +1089,46 @@
     sigmaInput.value = settings.sigma;
     sigmaVal.textContent = settings.sigma;
     segmentationSel.value = settings.segmentation || '0';
+    
+    // Populate Time Attack settings
+    if (taNormalCheck) taNormalCheck.checked = settings.timeAttackSettings.normalPatches !== false;
+    if (taDriftersCheck) taDriftersCheck.checked = settings.timeAttackSettings.drifters !== false;
+    if (taLinesCheck) taLinesCheck.checked = settings.timeAttackSettings.lines === true;
+    if (taShrinkingCheck) taShrinkingCheck.checked = settings.timeAttackSettings.shrinking !== false;
+    if (taEdgeCreepersCheck) taEdgeCreepersCheck.checked = settings.timeAttackSettings.edgeStalkers === true;
+    if (taRandomCheck) taRandomCheck.checked = settings.timeAttackSettings.random === true;
+    if (taTimeLimitInput) taTimeLimitInput.value = settings.timeAttackSettings.timeLimit || 1;
+    if (taTimeLimitVal) taTimeLimitVal.textContent = settings.timeAttackSettings.timeLimit || 1;
+    
+    // Populate Infinite Struggle settings
+    if (infAutoEvolveCheck) infAutoEvolveCheck.checked = settings.infiniteSettings.autoEvolve === true;
+    if (infNormalCheck) infNormalCheck.checked = settings.infiniteSettings.normalPatches === true;
+    if (infDriftersCheck) infDriftersCheck.checked = settings.infiniteSettings.drifters === true;
+    if (infLinesCheck) infLinesCheck.checked = settings.infiniteSettings.lines === true;
+    if (infShrinkingCheck) infShrinkingCheck.checked = settings.infiniteSettings.shrinking === true;
+    if (infEdgeCreepersCheck) infEdgeCreepersCheck.checked = settings.infiniteSettings.edgeStalkers === true;
   }
 
   function applyArenaDimensions() {
     if (phoneMode) {
+      // Phone mode: constrained dimensions
       const w = Math.min(window.innerWidth - 40, 390);
       const h = Math.max(420, Math.min(window.innerHeight - 140, 844 - 120));
       gameShell.style.width = `${w}px`;
       gameShell.style.height = `${h + 64}px`;
       gameArea.style.width = `${w}px`;
       gameArea.style.height = `${h}px`;
-      phoneToggleBtn.textContent = 'Phone Screen: On';
+      phoneToggleBtn.textContent = 'Fullscreen: Off';
     } else {
-      gameShell.style.width = '';
-      gameShell.style.height = '';
-      gameArea.style.width = '';
+      // Fullscreen mode: fill entire viewport
+      gameShell.style.width = '100%';
+      gameShell.style.height = '100vh';
+      gameArea.style.width = '100%';
       gameArea.style.height = '';
-      phoneToggleBtn.textContent = 'Phone Screen: Off';
+      phoneToggleBtn.textContent = 'Fullscreen: On';
     }
     gameArea.style.background = settings.bgColor;
-    // CRITICAL: Inset game area by 5px on all sides to create Edge Creeper gutter
+    // CRITICAL: Inset game area by 5px on all sides to create Edge Stalker gutter
     gameArea.style.padding = '5px';
     gameArea.style.boxSizing = 'border-box';
     document.documentElement.style.setProperty('--bg', settings.bgColor);
@@ -1035,35 +1191,8 @@
     if (avg > (settings.sessionStats.bestAvg || 0)) settings.sessionStats.bestAvg = avg;
     saveSettingsToStorage();
 
-    // enable drift when hitting 500 points (driftEnabled used at spawn time selection)
-    if (!driftEnabled && score >= 500) {
-      driftEnabled = true;
-      const rect = gameArea.getBoundingClientRect();
-      showIndicator('Drift Enabled', rect.width/2, 40, true);
-      driftCue();
-    }
-    
-    // In Infinite mode with auto-evolve, check for new enemy unlocks
-    // In other modes, enemy types are fixed by selection
-    if (mode === 'infinite' && settings.infiniteSettings.autoEvolve) {
-      // Enable faders at 1000 points
-      if (score >= 1000 && !settings.faderEnabled) {
-        settings.faderEnabled = true;
-        showSpeech('The veil shifts... patches now fade in and out.', '👁️', {ttlMs: 2200});
-      }
-      
-      // Enable tendrils at 2000 points
-      if (score >= 2000 && !lineSpawnTimer) {
-        startLineObstacles();
-        showSpeech('Beware... The Dark sends forth its tendrils.', '⚡', {ttlMs: 2200});
-      }
-      
-      // Enable edge creepers at 1500 points
-      if (score >= 1500 && !edgeCreepSpawnTimer) {
-        startEdgeCreepers();
-        showSpeech('Edge stalkers approach...', '🐛', {ttlMs: 2200});
-      }
-    }
+    // NOTE: Progressive unlock logic moved to checkProgressiveUnlocks() called from spawning loop
+    // to prevent duplicate spawn timer creation
 
     maybeLevelUpIfQualified();
 
@@ -1195,11 +1324,10 @@
   // ENEMY TYPE DEFINITIONS (deterministic, separated from UI)
   const EnemyTypes = {
     NORMAL: 'normal',        // Standard fade-in Gabor patches
-    FADER: 'fader',          // Fade in AND out
     DRIFTER: 'drifter',      // Moving targets
     SHRINKER: 'shrinker',    // Size changes over time
     TENDRIL: 'tendril',      // Line obstacles (handled separately)
-    EDGE_CREEPER: 'edge_creeper' // Edge-crawling threats
+    EDGE_STALKER: 'edge_stalker' // Edge-crawling threats
   };
 
   // Get active enemy pool based on current mode and settings
@@ -1207,52 +1335,61 @@
     const pool = [];
     
     if (mode === 'time') {
-      // Time Attack: ONLY user-selected enemies, NO defaults
-      if (settings.timeAttackSettings.normalPatches) pool.push(EnemyTypes.NORMAL);
-      if (settings.timeAttackSettings.faders) pool.push(EnemyTypes.FADER);
-      if (settings.timeAttackSettings.drifters) pool.push(EnemyTypes.DRIFTER);
-      if (settings.timeAttackSettings.shrinking) pool.push(EnemyTypes.SHRINKER);
-      // Tendrils and Edge Creepers spawn separately via their own systems
-      
-      if (ENEMY_AUDIT_MODE) {
-        console.log('[ENEMY AUDIT] Time Attack pool:', pool.map(t => t.toUpperCase()));
+      // Time Attack: Check if Random mode is enabled
+      if (settings.timeAttackSettings.random) {
+        // Random mode: All enemy types available
+        pool.push(EnemyTypes.NORMAL);
+        pool.push(EnemyTypes.DRIFTER);
+        pool.push(EnemyTypes.SHRINKER);
+        
+        if (DEBUG_MODE) {
+          console.log('[ENEMY AUDIT] Time Attack RANDOM mode pool:', pool.map(t => t.toUpperCase()));
+        }
+      } else {
+        // Manual selection: ALL user-selected enemies available immediately (NO score requirements)
+        // Normal Gabor Patches always included as baseline
+        if (settings.timeAttackSettings.normalPatches || true) pool.push(EnemyTypes.NORMAL);
+        if (settings.timeAttackSettings.drifters) pool.push(EnemyTypes.DRIFTER);
+        if (settings.timeAttackSettings.shrinking) pool.push(EnemyTypes.SHRINKER);
+        // Tendrils and Edge Stalkers spawn separately via their own systems
+        
+        if (DEBUG_MODE) {
+          console.log('[ENEMY AUDIT] Time Attack pool (ALL IMMEDIATE):', pool.map(t => t.toUpperCase()));
+        }
       }
     } else if (mode === 'infinite') {
       if (settings.infiniteSettings.autoEvolve) {
-        // Progressive evolution based on score
+        // Progressive evolution based on score (ONLY when Progressive is checked)
         pool.push(EnemyTypes.NORMAL);
         if (score >= 500) pool.push(EnemyTypes.DRIFTER);
-        if (score >= 1000) pool.push(EnemyTypes.FADER);
-        if (score >= 1500) pool.push(EnemyTypes.SHRINKER);
+        if (score >= 1200) pool.push(EnemyTypes.SHRINKER);
         
-        if (ENEMY_AUDIT_MODE) {
+        if (DEBUG_MODE) {
           console.log('[ENEMY AUDIT] Infinite Progressive pool:', pool.map(t => t.toUpperCase()), `(score: ${score})`);
         }
       } else {
-        // Manual selection: ONLY user-selected enemies, NO defaults
-        if (settings.infiniteSettings.normalPatches) pool.push(EnemyTypes.NORMAL);
-        if (settings.infiniteSettings.faders) pool.push(EnemyTypes.FADER);
+        // Manual selection: ALL selected enemies available immediately (NO score requirements)
+        pool.push(EnemyTypes.NORMAL); // Always include Gabor
         if (settings.infiniteSettings.drifters) pool.push(EnemyTypes.DRIFTER);
         if (settings.infiniteSettings.shrinking) pool.push(EnemyTypes.SHRINKER);
         
-        if (ENEMY_AUDIT_MODE) {
-          console.log('[ENEMY AUDIT] Infinite Manual pool:', pool.map(t => t.toUpperCase()));
+        if (DEBUG_MODE) {
+          console.log('[ENEMY AUDIT] Infinite Manual pool (ALL IMMEDIATE):', pool.map(t => t.toUpperCase()));
         }
       }
     } else if (mode === 'quest') {
-      // Quest mode: always progressive
+      // Quest mode: NO score-based unlocking, controlled by mission/level progression
+      // For now, all types available (missions will control what appears)
       pool.push(EnemyTypes.NORMAL);
-      if (score >= 500) pool.push(EnemyTypes.DRIFTER);
-      if (score >= 1000) pool.push(EnemyTypes.FADER);
-      if (score >= 1500) pool.push(EnemyTypes.SHRINKER);
+      pool.push(EnemyTypes.DRIFTER);
+      pool.push(EnemyTypes.SHRINKER);
       
-      if (ENEMY_AUDIT_MODE) {
-        console.log('[ENEMY AUDIT] Quest pool:', pool.map(t => t.toUpperCase()), `(score: ${score})`);
+      if (DEBUG_MODE) {
+        console.log('[ENEMY AUDIT] Quest pool (mission-controlled):', pool.map(t => t.toUpperCase()));
       }
     }
     
-    // CRITICAL: Return empty array if nothing selected
-    // Validation happens at session start, NOT here
+    // Pool will always have at least NORMAL (Gabor Patches)
     return pool;
   }
 
@@ -1260,20 +1397,16 @@
   function selectEnemyType() {
     const pool = getActiveEnemyPool();
     
-    // ASSERTION GUARD: Pool must not be empty
+    // Pool always has at least NORMAL (Gabor Patches), so this should never happen
+    // But keep a safety check just in case
     if (pool.length === 0) {
-      const errorMsg = `[FATAL ERROR] Attempted to spawn enemy with empty pool! Mode: ${mode}`;
-      console.error(errorMsg);
-      stopSpawning();
-      paused = true;
-      running = false;
-      alert('FATAL ERROR: No enemies selected. Cannot spawn targets.\n\nPlease select at least one enemy type in settings.');
-      throw new Error(errorMsg);
+      console.warn('[SAFETY CHECK] Empty pool detected, defaulting to NORMAL');
+      return EnemyTypes.NORMAL;
     }
     
     const selectedType = pool[Math.floor(Math.random() * pool.length)];
     
-    if (ENEMY_AUDIT_MODE) {
+    if (DEBUG_MODE) {
       console.log(`[ENEMY AUDIT] ✓ Spawning: ${selectedType.toUpperCase()} (from pool of ${pool.length} types)`);
     }
     
@@ -1315,7 +1448,6 @@
     el.style.top = `${top}px`;
     
     // Determine fade behavior based on enemy type (NOT score-based)
-    const isFader = (enemyType === EnemyTypes.FADER);
     const isDrifter = (enemyType === EnemyTypes.DRIFTER);
     const isShrinker = (enemyType === EnemyTypes.SHRINKER);
 
@@ -1363,21 +1495,28 @@
     }
 
     gameArea.appendChild(el);
-
-    // fade: determine type (normal vs fader)
-    let fadeDurMs, maxVisScore;
-    if (isFader) {
-      // Fader: fades IN to a peak visibility (25-35 pts worth), then fades OUT
-      const peakVis = settings.faderMinVis + Math.random() * (settings.faderMaxVis - settings.faderMinVis);
-      maxVisScore = Math.round(peakVis);
-      // Total duration: longer to allow fade in + fade out
-      fadeDurMs = Math.round((settings.fadeMinSecs + Math.random() * (settings.fadeMaxSecs - settings.fadeMinSecs)) * 1400);
-    } else {
-      // Normal: standard fade with random between fadeMin..fadeMax, with a chance for extra-slow ones
-      let fadeSecs = settings.fadeMinSecs + Math.random() * (settings.fadeMaxSecs - settings.fadeMinSecs);
-      if (Math.random() < 0.12) fadeSecs = settings.fadeMaxSecs + Math.random() * (settings.fadeMaxSecs * 0.8);
-      fadeDurMs = Math.max(10, Math.round(fadeSecs * 1000));
+    
+    // DEBUG MODE: Make target highly visible
+    if (DEBUG_MODE) {
+      el.style.background = 'red';
+      el.style.opacity = '1';
+      el.style.boxShadow = '0 0 10px yellow, 0 0 20px red, inset 0 0 20px yellow';
+      el.style.border = '3px solid yellow';
+      el.style.zIndex = '10000';
+      // Clear Gabor canvas if present
+      if (type === 'gabor') {
+        const canvas = el.querySelector('canvas');
+        if (canvas) canvas.style.display = 'none';
+      }
     }
+
+    // All patches fade in over time (no more fader type)
+    let fadeDurMs;
+    // Normal: standard fade with random between fadeMin..fadeMax, with a chance for extra-slow ones
+    let fadeSecs = settings.fadeMinSecs + Math.random() * (settings.fadeMaxSecs - settings.fadeMinSecs);
+    if (Math.random() < 0.12) fadeSecs = settings.fadeMaxSecs + Math.random() * (settings.fadeMaxSecs * 0.8);
+    fadeDurMs = Math.max(10, Math.round(fadeSecs * 1000));
+    
     const start = performance.now();
     let removed = false;
 
@@ -1418,6 +1557,23 @@
       hits += 1;
       totalPointsFromHits += pts;
       consecutiveMisses = 0; // Reset miss streak
+      
+      // Track rapid hits for side quests (3-second window)
+      const hitTime = Date.now();
+      rapidHitsWindow.push(hitTime);
+      rapidHitsWindow = rapidHitsWindow.filter(t => hitTime - t < 3000);
+      
+      // Side quest tracking
+      let earliestStreak = 0;
+      let hitStreak = hits - misses; // Simple hit streak (no misses)
+      checkSideQuests({
+        hit: true,
+        points: pts,
+        hitStreak,
+        earliestStreak: pts >= 40 ? consecutiveHits : 0, // Track "earliest" hits
+        drifterKill: instance.type === EnemyTypes.DRIFTER
+      });
+      
       // earliest hit tracking
       if (pts > earliestHit) earliestHit = pts;
       // Streaks: consecutive hits with >=20
@@ -1440,8 +1596,13 @@
       updateHeader();
       // Quest progress hooks
       questOnHit(pts);
-      el.remove();
+      
+      // Stop animation loop FIRST
       if (instance._raf) cancelAnimationFrame(instance._raf);
+      
+      // Remove immediately (no death animation)
+      el.remove();
+      
       playHitSound();
     }
 
@@ -1478,24 +1639,8 @@
       const elapsed = now - start;
       const progress = Math.min(1, elapsed / fadeDurMs);
       
-      let visual;
-      if (isFader) {
-        // Fader: fade in to 50% progress, then fade out
-        if (progress < 0.5) {
-          // Fade in: 0 to peak
-          visual = Math.pow(progress * 2, 0.9);
-        } else {
-          // Fade out: peak to 0
-          visual = Math.pow(1 - (progress - 0.5) * 2, 0.9);
-        }
-        // Scale visual to maxVisScore / maxPerfectScore
-        const scaleFactor = maxVisScore / settings.maxPerfectScore;
-        visual = visual * scaleFactor;
-      } else {
-        // Normal: fade in over full duration
-        visual = Math.pow(progress, 0.9);
-      }
-      
+      // Standard fade-in for all patches
+      const visual = Math.pow(progress, 0.9);
       el.style.opacity = String(Math.max(0.02, visual));
       
       // Scale and rotation based on enemy type
@@ -1541,6 +1686,7 @@
 
     const instance = {
       el,
+      type: enemyType, // CRITICAL: Track enemy type for side quest and scoring
       destroy: () => {
         if (!removed) {
           removed = true;
@@ -1558,45 +1704,80 @@
     return instance;
   }
 
+  // Progressive unlock tracking - prevents duplicate triggers
+  let unlocksTriggered = {
+    drift500: false,
+    shrinker1200: false,
+    edgeStalkers1500: false,
+    tendrils2000: false
+  };
+  
+  function resetProgressiveUnlocks() {
+    unlocksTriggered = {
+      drift500: false,
+      shrinker1200: false,
+      edgeStalkers1500: false,
+      tendrils2000: false
+    };
+  }
+  
+  function checkProgressiveUnlocks() {
+    // Only check if game is actually running and not paused
+    if (!running || paused) return;
+    
+    // Only perform unlocks in Infinite mode with Progressive (auto-evolve) enabled
+    if (mode !== 'infinite' || !settings.infiniteSettings.autoEvolve) return;
+    
+    // Drift at 500 points
+    if (score >= 500 && !unlocksTriggered.drift500 && !driftEnabled) {
+      unlocksTriggered.drift500 = true;
+      driftEnabled = true;
+      const rect = gameArea.getBoundingClientRect();
+      showIndicator('Drift Enabled', rect.width/2, 40, true);
+      showSpeech('Movement patterns shift... Drifter Patches emerge!', '🌀', {ttlMs: 2400});
+      driftCue();
+    }
+    
+    // Shrinker Patches at 1200 points
+    if (score >= 1200 && !unlocksTriggered.shrinker1200) {
+      unlocksTriggered.shrinker1200 = true;
+      showSpeech('Size fluctuations detected... Shrinking Patches appear!', '🔄', {ttlMs: 2400});
+    }
+    
+    // Edge Stalkers at 1500 points
+    if (score >= 1500 && !unlocksTriggered.edgeStalkers1500 && !edgeCreepSpawnTimer) {
+      unlocksTriggered.edgeStalkers1500 = true;
+      startEdgeCreepers();
+      showSpeech('Edge stalkers approach from the periphery...', '🐛', {ttlMs: 2400});
+    }
+    
+    // Tendrils at 2000 points
+    if (score >= 2000 && !unlocksTriggered.tendrils2000 && !lineSpawnTimer) {
+      unlocksTriggered.tendrils2000 = true;
+      startLineObstacles();
+      showSpeech('Beware... The Dark sends forth its tendrils.', '⚡', {ttlMs: 2400});
+    }
+  }
+
   // spawn control
   function startSpawning() {
     stopSpawning();
     
     // ═══════════════════════════════════════════════════════════════════════════════
-    // CRITICAL VALIDATION: Ensure at least one enemy type is selected
+    // VALIDATION: Gabor Patches (NORMAL) are always available, so pool is never truly empty
+    // This check is now informational only
     // ═══════════════════════════════════════════════════════════════════════════════
     const enemyPool = getActiveEnemyPool();
     const hasTendrils = shouldSpawnTendrils();
     const hasEdgeCreepers = shouldSpawnEdgeCreepers();
     const totalEnemyTypes = enemyPool.length + (hasTendrils ? 1 : 0) + (hasEdgeCreepers ? 1 : 0);
     
-    if (totalEnemyTypes === 0) {
-      // NO ENEMIES SELECTED - BLOCK SESSION START
-      console.error('[SESSION START BLOCKED] No enemies selected!');
-      console.error('  - Main enemy pool:', enemyPool);
-      console.error('  - Tendrils enabled:', hasTendrils);
-      console.error('  - Edge Creepers enabled:', hasEdgeCreepers);
-      
-      alert(
-        '❌ Cannot Start Mission\n\n' +
-        'No enemies selected!\n\n' +
-        'Please select at least one enemy type:\n' +
-        '  • Normal Patches\n' +
-        '  • Faders\n' +
-        '  • Drifters\n' +
-        '  • Shrinkers\n' +
-        '  • Tendrils\n' +
-        '  • Edge Creepers\n\n' +
-        'Or enable "Progressive Evolution" in Infinite Struggle.'
-      );
-      return; // Exit without starting
-    }
-    
-    if (ENEMY_AUDIT_MODE) {
+    // Log enemy configuration for debugging
+    if (DEBUG_MODE || totalEnemyTypes === 1) {
       console.log('[SESSION START] Enemy configuration:');
-      console.log('  - Main pool:', enemyPool.map(t => t.toUpperCase()));
+      console.log('  - Main pool:', enemyPool.map(e => e.toUpperCase()));
       console.log('  - Tendrils:', hasTendrils ? 'YES' : 'NO');
-      console.log('  - Edge Creepers:', hasEdgeCreepers ? 'YES' : 'NO');
+      console.log('  - Edge Stalkers:', hasEdgeCreepers ? 'YES' : 'NO');
       console.log('  - Total types:', totalEnemyTypes);
     }
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1620,7 +1801,12 @@
 
     const freqMs = Math.max(50, Math.round(Number(settings.spawnSecs) * 1000));
     spawnTimer = setInterval(() => {
+      if (paused || !running) return; // Don't spawn if paused
       if (activeTargets.size >= settings.maxConcurrent) return;
+      
+      // Check for progressive unlocks (only triggers once per threshold)
+      checkProgressiveUnlocks();
+      
       createTargetInstance();
     }, freqMs);
     
@@ -1629,13 +1815,13 @@
       startLineObstacles();
     }
     
-    // Start Edge Creepers if enabled for this mode
-    console.log('[EDGE CREEPER DEBUG] Game start - checking if Edge Creepers should spawn...');
+    // Start Edge Stalkers if enabled for this mode
+    console.log('[EDGE STALKER DEBUG] Game start - checking if Edge Stalkers should spawn...');
     if (shouldSpawnEdgeCreepers()) {
-      console.log('[EDGE CREEPER DEBUG] ✓ Edge Creepers ENABLED - starting spawn timer...');
+      console.log('[EDGE STALKER DEBUG] ✓ Edge Stalkers ENABLED - starting spawn timer...');
       startEdgeCreepers();
     } else {
-      console.log('[EDGE CREEPER DEBUG] ✗ Edge Creepers DISABLED - skipping spawn timer');
+      console.log('[EDGE STALKER DEBUG] ✗ Edge Stalkers DISABLED - skipping spawn timer');
     }
     
     // Start parallel party events for Quest mode
@@ -1643,10 +1829,16 @@
       startPartyEvents();
     }
     
+    // Start Side Quests (appears in all game modes)
+    if (sideQuestsPanel) {
+      sideQuestsPanel.style.display = 'block';
+      startSideQuests();
+    }
+    
     // ═══════════════════════════════════════════════════════════════════════════════
     // VISUAL VERIFICATION MODE - Shows active enemy types on screen
     // ═══════════════════════════════════════════════════════════════════════════════
-    if (ENEMY_AUDIT_MODE) {
+    if (DEBUG_MODE) {
       // Remove existing overlay if present
       const existingOverlay = document.getElementById('enemy-audit-overlay');
       if (existingOverlay) existingOverlay.remove();
@@ -1676,7 +1868,7 @@
           '<strong>Main Pool:</strong><br>' +
           (currentPool.length > 0 ? currentPool.map(t => '  • ' + t.toUpperCase()).join('<br>') : '  (empty)') + '<br>' +
           '<strong>Tendrils:</strong> ' + (shouldSpawnTendrils() ? '✓ YES' : '✗ NO') + '<br>' +
-          '<strong>Edge Creepers:</strong> ' + (shouldSpawnEdgeCreepers() ? '✓ YES' : '✗ NO');
+          '<strong>Edge Stalkers:</strong> ' + (shouldSpawnEdgeCreepers() ? '✓ YES' : '✗ NO');
         
         if (running) requestAnimationFrame(updateOverlay);
       };
@@ -1686,17 +1878,20 @@
     }
     // ═══════════════════════════════════════════════════════════════════════════════
     
-    pauseResumeBtn.textContent = 'Pause';
+    pauseResumeBtn.textContent = '⏸';
+    pauseResumeBtn.title = 'Pause';
   }
 
   function stopSpawning() {
     running = false;
     if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
-    pauseResumeBtn.textContent = 'Resume';
+    pauseResumeBtn.textContent = '▶️';
+    pauseResumeBtn.title = 'Resume';
     stopMusic();
     stopLineObstacles(); // Stop and remove all Tendrils
     stopEdgeCreepers();
     stopPartyEvents();
+    stopSideQuests(); // Stop side quests
   }
 
   function clearAllTargets() {
@@ -1711,7 +1906,7 @@
     const target = ev.target;
     // Ignore clicks on targets, edge creepers, and SVG elements (Tendrils)
     if (target.closest && target.closest('.target')) return;
-    if (target.classList && target.classList.contains('edge-creeper')) return;
+    if (target.classList && target.classList.contains('edge-stalker')) return;
     if (target.tagName === 'svg' || target.tagName === 'path') return; // Tendrils
     const rect = gameArea.getBoundingClientRect();
     const x = ev.clientX - rect.left;
@@ -1725,6 +1920,9 @@
     score = Math.max(0, score - totalPenalty);
     misses += 1;
     consecutiveMisses++;
+    
+    // Side quest tracking for miss
+    checkSideQuests({miss: true});
     
     showIndicator('-' + totalPenalty, x, y, false);
     updateHeader();
@@ -1804,9 +2002,6 @@
         case EnemyTypes.NORMAL:
           threatList.push('Standard Gabor Patches (fade-in)');
           break;
-        case EnemyTypes.FADER:
-          threatList.push('Fader Patches (fade in/out)');
-          break;
         case EnemyTypes.DRIFTER:
           threatList.push('Drifter Patches (moving targets)');
           break;
@@ -1820,7 +2015,7 @@
       threatList.push('Dark Tendrils (line obstacles)');
     }
     if (shouldSpawnEdgeCreepers()) {
-      threatList.push('Edge Creepers (peripheral stalkers)');
+      threatList.push('Edge Stalkers (peripheral stalkers)');
     }
     
     if (threatList.length === 0) {
@@ -1920,18 +2115,19 @@
     const dialog = document.createElement('div');
     dialog.className = 'story-dialog pbcr-dialog';
     
-    const title = document.createElement('div');
-    title.className = 'mission-title jrpg';
-    title.textContent = '⚔️ Post-Battle Carnage Report';
+    const title = document.createElement('h2');
+    title.className = 'pbcr-title';
+    title.textContent = '📋 Post-Battle Carnage Report';
     
-    // Mission summary header
     const missionHeader = document.createElement('div');
     missionHeader.className = 'mission-header';
-    const missionResult = missionData.avgPts >= 25 ? '🏆 VICTORY' : 
+    const partySurvived = party && party.length > 0 && party.some(m => m.hp > 0);
+    const missionResult = !partySurvived ? '💀 DEFEATED' :
+                           missionData.avgPts >= 25 ? '🏆 VICTORY' : 
                            missionData.avgPts >= 15 ? '⚔️ SURVIVED' : 
                            '💀 COSTLY';
     missionHeader.innerHTML = `
-      <div class="result-badge ${missionData.avgPts >= 25 ? 'victory' : missionData.avgPts >= 15 ? 'survived' : 'costly'}">
+      <div class="result-badge ${!partySurvived ? 'defeated' : missionData.avgPts >= 25 ? 'victory' : missionData.avgPts >= 15 ? 'survived' : 'costly'}">
         ${missionResult}
       </div>
       <div class="mission-mode">${mode === 'time' ? 'Time Attack' : mode === 'infinite' ? 'Infinite Struggle' : 'Quest Mission'}</div>
@@ -2200,6 +2396,16 @@
       }
 
       score = 0; hits = 0; misses = 0; totalPointsFromHits = 0; earliestHit = 0; streakCount = 0; streakMaxAchieved = 0; thresholdsHit = new Set(); avgBelow10Announced=false; avgWasBelow15=false;
+      consecutiveMisses = 0; consecutiveHits = 0; rapidHitsWindow = []; driftEnabled = false;
+      
+      // Clean up any leftover pause modal from previous game
+      if (typeof pauseModalOverlay !== 'undefined' && pauseModalOverlay) {
+        pauseModalOverlay.remove();
+        pauseModalOverlay = null;
+      }
+      
+      // CRITICAL: Reset progressive unlock tracking to prevent duplicate spawns
+      resetProgressiveUnlocks();
       
       // Reset/heal party for Quest Mode
       if (selectedMode === 'quest' && party.length > 0) {
@@ -2229,6 +2435,8 @@
       applyArenaDimensions();
       questPanel.classList.add('hidden');
       if (selectedMode === 'time') {
+        // Set time limit from settings (convert minutes to seconds)
+        timeLimit = (settings.timeAttackSettings.timeLimit || 1) * 60;
         startTimer(timeLimit);
         // Apply Time Attack settings
         if (settings.timeAttackSettings.lines) {
@@ -2245,7 +2453,6 @@
         ensureQuest();
         questState.active = true;
         questPanel.classList.remove('hidden');
-        if (questPanelToggleBtn) questPanelToggleBtn.textContent = 'Objectives: On';
         updateQuestObjectivesUI();
         showSpeech(questState.story.intro, questState.story.mentorEmoji);
         // Initialize party for Quest Mode
@@ -2320,15 +2527,23 @@
   
   function shouldSpawnTendrils() {
     if (mode === 'time') {
-      return settings.timeAttackSettings.lines === true;
+      // Time Attack: Random mode enables all, otherwise check manual selection
+      if (settings.timeAttackSettings.random) {
+        return true; // Random mode: all enemy types enabled
+      } else {
+        return settings.timeAttackSettings.lines === true;
+      }
     } else if (mode === 'infinite') {
       if (settings.infiniteSettings.autoEvolve) {
+        // Progressive mode: unlock at 2000 score
         return score >= 2000;
       } else {
+        // Manual selection: Spawn immediately if selected (NO score requirement)
         return settings.infiniteSettings.lines === true;
       }
     } else if (mode === 'quest') {
-      return score >= 2000;
+      // Quest mode: mission-controlled, no score requirements
+      return true;
     }
     return false;
   }
@@ -2338,64 +2553,79 @@
       clearInterval(lineSpawnTimer);
       lineSpawnTimer = null;
     }
+    // Remove all SVG tendrils from DOM
     lineObstacles.forEach(line => {
-      if (line.el) line.el.remove();
+      if (line.el) {
+        line.el.remove();
+      }
       if (line.timer) clearInterval(line.timer);
     });
     lineObstacles = [];
+    
+    // Safety: Remove any orphaned SVG elements
+    const allSvgs = gameArea.querySelectorAll('svg');
+    allSvgs.forEach(svg => {
+      if (svg.classList.contains('tendril-svg')) {
+        svg.remove();
+      }
+    });
   }
 
-  // --- Edge Creeper system ---
+  // --- Edge Stalker system ---
   function startEdgeCreepers() {
-    // Only start if explicitly enabled in mode settings
-    if (!shouldSpawnEdgeCreepers()) {
-      if (EDGE_CREEPER_DEBUG) console.log('[EDGE CREEPER DEBUG] NOT spawning - shouldSpawnEdgeCreepers() returned false');
-      return;
-    }
-    if (edgeCreepSpawnTimer) {
-      if (EDGE_CREEPER_DEBUG) console.log('[EDGE CREEPER DEBUG] Spawn timer already running');
-      return;
-    }
+    if (!shouldSpawnEdgeCreepers()) return;
+    if (edgeCreepSpawnTimer) return;
     
     const intervalMs = 15000 + Math.random() * 8000; // 15-23 seconds between spawns
-    if (EDGE_CREEPER_DEBUG) console.log(`[EDGE CREEPER DEBUG] Starting Edge Creeper spawn timer with ${intervalMs}ms interval`);
     
     edgeCreepSpawnTimer = setInterval(() => {
-      if (paused || !running) {
-        if (EDGE_CREEPER_DEBUG) console.log('[EDGE CREEPER DEBUG] Skipping spawn - game paused or not running');
-        return;
-      }
-      if (EDGE_CREEPER_DEBUG) console.log('[EDGE CREEPER DEBUG] Spawn timer tick - calling createEdgeCreeper()');
+      if (paused || !running) return;
       createEdgeCreeper();
     }, intervalMs);
     
-    // Spawn one immediately for testing
-    if (EDGE_CREEPER_DEBUG) {
-      console.log('[EDGE CREEPER DEBUG] Spawning initial creeper immediately');
-      createEdgeCreeper();
+    // Spawn first one after a short delay (3-5 seconds) for Infinite mode
+    if (mode === 'infinite') {
+      const initialDelay = 3000 + Math.random() * 2000;
+      setTimeout(() => {
+        if (running && !paused) createEdgeCreeper();
+      }, initialDelay);
     }
   }
   
   function shouldSpawnEdgeCreepers() {
+    console.log('[EDGE STALKER] Checking shouldSpawnEdgeCreepers...');
+    console.log('[EDGE STALKER] Mode:', mode);
+    console.log('[EDGE STALKER] Settings:', JSON.stringify(settings.timeAttackSettings), JSON.stringify(settings.infiniteSettings));
+    
     let result = false;
     if (mode === 'time') {
-      result = settings.timeAttackSettings.edgeCreepers === true;
+      // Time Attack: Random mode enables all, otherwise check manual selection
+      if (settings.timeAttackSettings.random) {
+        result = true; // Random mode: all enemy types enabled
+      } else {
+        result = settings.timeAttackSettings.edgeStalkers === true;
+      }
     } else if (mode === 'infinite') {
       if (settings.infiniteSettings.autoEvolve) {
+        // Progressive mode: unlock at 1500 score
         result = score >= 1500;
       } else {
-        result = settings.infiniteSettings.edgeCreepers === true;
+        // Manual selection: Spawn immediately if selected (NO score requirement)
+        result = settings.infiniteSettings.edgeStalkers === true;
       }
     } else if (mode === 'quest') {
-      result = score >= 1500;
+      // Quest mode: mission-controlled, no score requirements
+      result = true;
     }
     
-    if (EDGE_CREEPER_DEBUG) {
-      console.log(`[EDGE CREEPER DEBUG] shouldSpawnEdgeCreepers() = ${result} (mode: ${mode}, score: ${score})`);
+    console.log('[EDGE STALKER] Result:', result);
+    
+    if (DEBUG_MODE) {
+      console.log(`[EDGE STALKER DEBUG] shouldSpawnEdgeCreepers() = ${result} (mode: ${mode}, score: ${score})`);
       if (mode === 'time') {
-        console.log('[EDGE CREEPER DEBUG] Time Attack mode - checking settings.timeAttackSettings.edgeCreepers:', settings.timeAttackSettings.edgeCreepers);
+        console.log('[EDGE STALKER DEBUG] Time Attack mode - random:', settings.timeAttackSettings.random, 'edgeStalkers:', settings.timeAttackSettings.edgeStalkers);
       } else if (mode === 'infinite') {
-        console.log('[EDGE CREEPER DEBUG] Infinite mode - autoEvolve:', settings.infiniteSettings.autoEvolve, 'edgeCreepers:', settings.infiniteSettings.edgeCreepers);
+        console.log('[EDGE STALKER DEBUG] Infinite mode - autoEvolve:', settings.infiniteSettings.autoEvolve, 'edgeStalkers:', settings.infiniteSettings.edgeStalkers);
       }
     }
     
@@ -2407,140 +2637,124 @@
       clearInterval(edgeCreepSpawnTimer);
       edgeCreepSpawnTimer = null;
     }
-    edgeCreepers.forEach(creep => {
-      if (creep.el) creep.el.remove();
-      if (creep.timer) clearInterval(creep.timer);
+    // Clear all active edge creepers
+    edgeStalkers.forEach(creep => {
+      if (creep.el) {
+        creep.el.remove();
+      }
+      if (creep.animationFrame) {
+        cancelAnimationFrame(creep.animationFrame);
+      }
     });
-    edgeCreepers = [];
+    edgeStalkers = [];
+    
+    // Safety: Remove any orphaned edge creeper elements
+    const allCreepers = gameArea.querySelectorAll('.edge-stalker');
+    allCreepers.forEach(el => el.remove());
   }
 
   function createEdgeCreeper() {
-    if (EDGE_CREEPER_DEBUG) console.log('[EDGE CREEPER DEBUG] === createEdgeCreeper() called ===');
-    
-    // Edge Creepers must be positioned in the 5px gutter around gameArea
-    // They are children of gameArea, and use the padding space
-    const GUTTER_SIZE = 5;
-    
-    // Get inner dimensions (actual play area)
     const rect = gameArea.getBoundingClientRect();
-    const playWidth = rect.width - (GUTTER_SIZE * 2);
-    const playHeight = rect.height - (GUTTER_SIZE * 2);
-    
-    if (EDGE_CREEPER_DEBUG) {
-      console.log(`[EDGE CREEPER DEBUG] GameArea dimensions: ${rect.width}x${rect.height}`);
-      console.log(`[EDGE CREEPER DEBUG] Play area: ${playWidth}x${playHeight}`);
-    }
     
     // Randomly select which edge (0=top, 1=right, 2=bottom, 3=left)
     const side = Math.floor(Math.random() * 4);
-    const sideNames = ['TOP', 'RIGHT', 'BOTTOM', 'LEFT'];
     
-    // Size: 2-4px circular
-    const size = 2 + Math.random() * 2;
+    // Create container for slime
+    const container = document.createElement('div');
+    container.className = 'edge-stalker';
+    container.style.position = 'absolute';
+    container.style.zIndex = '10000';
+    container.style.pointerEvents = 'auto';
+    container.style.cursor = 'default';
+    container.style.width = '48px';
+    container.style.height = '24px';
     
-    const el = document.createElement('div');
-    el.className = 'edge-creeper';
-    el.style.position = 'absolute';
-    el.style.zIndex = '10000';
-    el.style.pointerEvents = 'auto';
-    el.style.cursor = 'default'; // Don't reveal position with cursor change
-    el.style.borderRadius = '50%'; // Circular
-    el.style.transition = 'none'; // No smooth transitions for stepped movement
+    // Create SVG slime shape (organic blob with bell curve profile)
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '48');
+    svg.setAttribute('height', '16');
+    svg.style.overflow = 'visible';
+    svg.style.pointerEvents = 'none';
+    svg.style.position = 'absolute';
     
-    // DEBUG MODE: Make it VERY obvious
-    if (EDGE_CREEPER_DEBUG) {
-      el.style.background = 'red';
-      el.style.opacity = '1';
-      el.style.width = '20px';  // Bigger in debug mode
-      el.style.height = '20px';
-      el.style.boxShadow = '0 0 10px yellow, 0 0 20px red';
-      el.style.border = '2px solid yellow';
-      console.log(`[EDGE CREEPER DEBUG] Spawning on ${sideNames[side]} edge, size: 20x20px (debug mode)`);
-    } else {
-      // Normal mode: use app background color (#0a0e27) with subtle highlight
-      el.style.width = size + 'px';
-      el.style.height = size + 'px';
-      el.style.background = '#0a0e27'; // App background color (matches body background)
-      el.style.boxShadow = '0 0 1px rgba(255,255,255,0.3), inset 0 0 1px rgba(255,255,255,0.2)';
-      console.log(`[EDGE CREEPER DEBUG] Spawning on ${sideNames[side]} edge, size: ${size.toFixed(1)}px`);
-    }
+    // Create organic blob shape using path (bell curve profile)
+    const blob = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const d = 'M 4,8 Q 12,2 24,2 Q 36,2 44,8 Q 36,14 24,14 Q 12,14 4,8 Z';
+    blob.setAttribute('d', d);
+    blob.setAttribute('fill', 'rgb(255,255,255)');
+    blob.setAttribute('opacity', '1.0');
     
-    // Movement parameters - much slower with irregular pauses
-    let startPos, endPos, currentPos, axis;
-    const duration = EDGE_CREEPER_DEBUG ? 16000 : (36000 + Math.random() * 18000); // 36-54 seconds
+    svg.appendChild(blob);
+    container.appendChild(svg);
     
-    // Position OUTSIDE game area in the padding zone (looks like tiny bulge on edge)
-    // Coordinates are relative to gameArea
+    // Movement parameters
+    let startPos, endPos, currentPos, targetPos, axis;
+    const duration = 15000 + Math.random() * 10000; // 15-25 seconds
+    const padding = 10;
+    const edgeLength = side % 2 === 0 ? rect.width : rect.height;
+    
+    // Randomize start position (first 30% of edge)
+    startPos = padding + Math.random() * (edgeLength * 0.3);
+    endPos = edgeLength - 48 - padding;
+    
+    // Position container at edge, SVG offset to extend half outside
     if (side === 0) {
-      // TOP EDGE: Moves left to right along top edge
+      // TOP EDGE
       axis = 'horizontal';
-      el.style.top = '-2px'; // Outside game area, on the outer edge
-      startPos = 0;
-      endPos = rect.width - size;
+      container.style.top = '0';
+      container.style.left = startPos + 'px';
+      svg.style.top = '-8px';
+      svg.style.left = '0';
     } else if (side === 1) {
-      // RIGHT EDGE: Moves top to bottom along right edge
+      // RIGHT EDGE
       axis = 'vertical';
-      el.style.right = '-2px'; // Outside game area, on the outer edge
-      startPos = 0;
-      endPos = rect.height - size;
+      container.style.right = '0';
+      container.style.top = startPos + 'px';
+      svg.style.right = '-8px';
+      svg.style.top = '-12px';
+      svg.style.transform = 'rotate(90deg)';
+      svg.style.transformOrigin = 'right top';
     } else if (side === 2) {
-      // BOTTOM EDGE: Moves right to left along bottom edge
+      // BOTTOM EDGE
       axis = 'horizontal';
-      el.style.bottom = '-2px'; // Outside game area, on the outer edge
-      startPos = rect.width - size;
-      endPos = 0;
+      container.style.bottom = '0';
+      container.style.left = startPos + 'px';
+      svg.style.bottom = '-8px';
+      svg.style.left = '0';
     } else {
-      // LEFT EDGE: Moves bottom to top along left edge
+      // LEFT EDGE
       axis = 'vertical';
-      el.style.left = '-2px'; // Outside game area, on the outer edge
-      startPos = rect.height - size;
-      endPos = 0;
+      container.style.left = '0';
+      container.style.top = startPos + 'px';
+      svg.style.left = '-8px';
+      svg.style.top = '-12px';
+      svg.style.transform = 'rotate(90deg)';
+      svg.style.transformOrigin = 'left top';
     }
     
     currentPos = startPos;
+    targetPos = startPos;
     
-    // Set initial position
-    if (axis === 'horizontal') {
-      el.style.left = currentPos + 'px';
-    } else {
-      el.style.top = currentPos + 'px';
-    }
+    // Apply initial scale (starts small)
+    const rotationPart = (axis === 'vertical' ? 'rotate(90deg) ' : '');
+    svg.style.transform = rotationPart + 'scale(0.25)';
     
-    if (EDGE_CREEPER_DEBUG) {
-      console.log(`[EDGE CREEPER DEBUG] Initial position: ${axis === 'horizontal' ? 'left' : 'top'} = ${currentPos}px`);
-      console.log(`[EDGE CREEPER DEBUG] Will travel from ${startPos} to ${endPos} over ${duration}ms`);
-    }
-    
-    gameArea.appendChild(el);
-    
-    if (EDGE_CREEPER_DEBUG) {
-      console.log(`[EDGE CREEPER DEBUG] Element appended to gameArea, should be visible now!`);
-      console.log(`[EDGE CREEPER DEBUG] Element styles:`, {
-        position: el.style.position,
-        left: el.style.left,
-        top: el.style.top,
-        width: el.style.width,
-        height: el.style.height,
-        background: el.style.background,
-        zIndex: el.style.zIndex
-      });
-    }
+    gameArea.appendChild(container);
+    playEdgeCreeperSpawnSound();
     
     const startTime = performance.now();
     let removed = false;
-    let lastLogTime = 0;
-    
-    // Inching animation: irregular steps with random pauses
-    const stepIntervalMs = 500; // Base interval (will vary)
-    const totalSteps = Math.floor(duration / stepIntervalMs);
-    let currentStep = 0;
+    let isStretching = false;
+    let pauseUntil = startTime;
+    let alarmPlayed = false;
     
     const creepObj = {
-      el,
+      el: container,
       removed: false,
       side,
       startTime,
-      inchTimer: null,
+      animationFrame: null,
+      alarmPlayed: false
     };
     
     function onClick(ev) {
@@ -2548,152 +2762,162 @@
       if (removed) return;
       removed = true;
       creepObj.removed = true;
-      clearInterval(creepObj.inchTimer);
+      if (creepObj.animationFrame) cancelAnimationFrame(creepObj.animationFrame);
       
       const elapsed = performance.now() - startTime;
       const progress = Math.min(1, elapsed / duration);
       
-      // Score based on how early detected (earlier = more points)
+      // Score INVERSE of progress: Earlier = MORE points
       const maxPts = 50;
-      const minPts = 10;
-      const pts = Math.round(maxPts - (progress * (maxPts - minPts)));
+      const minPts = 5;
+      const pts = Math.round(minPts + ((1 - progress) * (maxPts - minPts)));
       
       score += pts;
       hits++;
       totalPointsFromHits += pts;
       consecutiveMisses = 0;
       
-      console.log(`[EDGE CREEPER] ✓ CLICKED at ${(progress * 100).toFixed(1)}% progress, awarded ${pts} pts`);
+      checkSideQuests({edgeCreepKill: true});
       
-      // Show indicator at click position, not center
-      const clickX = ev.clientX - rect.left;
-      const clickY = ev.clientY - rect.top;
-      // Keep indicator within game area bounds
-      const safeX = Math.max(30, Math.min(rect.width - 30, clickX));
-      const safeY = Math.max(30, Math.min(rect.height - 30, clickY));
-      showIndicator('+' + pts, safeX, safeY, true);
+      // White explosion
+      const explosion = document.createElement('div');
+      explosion.style.position = 'absolute';
+      explosion.style.left = container.style.left;
+      explosion.style.top = container.style.top;
+      explosion.style.right = container.style.right;
+      explosion.style.bottom = container.style.bottom;
+      explosion.style.width = '60px';
+      explosion.style.height = '60px';
+      explosion.style.borderRadius = '50%';
+      explosion.style.background = 'rgba(255,255,255,0.9)';
+      explosion.style.pointerEvents = 'none';
+      explosion.style.zIndex = '10001';
+      explosion.style.animation = 'creeperExplosionClick 0.4s ease-out';
+      gameArea.appendChild(explosion);
+      setTimeout(() => explosion.remove(), 400);
+      
+      const containerRect = container.getBoundingClientRect();
+      const clickX = containerRect.left + containerRect.width/2 - rect.left;
+      const clickY = containerRect.top + containerRect.height/2 - rect.top;
+      showIndicator('+' + pts, clickX, clickY, true);
       updateHeader();
+      playEdgeCreeperHitSound();
       
-      el.remove();
-      edgeCreepers = edgeCreepers.filter(c => c !== creepObj);
-      playEdgeCreeperHitSound(); // Unique sound for Edge Creepers
+      container.remove();
+      edgeStalkers = edgeStalkers.filter(c => c !== creepObj);
     }
     
-    el.addEventListener('pointerdown', onClick);
+    container.addEventListener('pointerdown', onClick);
     
-    if (EDGE_CREEPER_DEBUG) {
-      console.log('[EDGE CREEPER DEBUG] Click handler attached');
-    }
-    
-    // Irregular inching animation with bulge, pauses, and visibility progression
-    let shouldMove = true; // Controls irregular movement
-    let pauseCounter = 0;
-    
-    creepObj.inchTimer = setInterval(() => {
+    function animateSlimeCrawl() {
       if (removed) {
-        clearInterval(creepObj.inchTimer);
+        if (creepObj.animationFrame) cancelAnimationFrame(creepObj.animationFrame);
         return;
       }
-      if (paused || !running) return;
-      
-      const elapsed = performance.now() - startTime;
-      const progress = Math.min(currentStep / totalSteps, 1);
-      
-      // Irregular movement: pause randomly
-      pauseCounter++;
-      if (pauseCounter >= 3) { // After 3 steps
-        shouldMove = Math.random() > 0.4; // 60% chance to pause
-        pauseCounter = 0;
+      if (paused || !running) {
+        creepObj.animationFrame = requestAnimationFrame(animateSlimeCrawl);
+        return;
       }
       
-      if (shouldMove && currentStep < totalSteps) {
-        currentStep++;
-        
-        // Move in stepped increments
-        currentPos = startPos + (endPos - startPos) * (currentStep / totalSteps);
-        if (axis === 'horizontal') {
-          el.style.left = currentPos + 'px';
+      const now = performance.now();
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Play alarm at 80% progress
+      if (!alarmPlayed && progress >= 0.8) {
+        alarmPlayed = true;
+        creepObj.alarmPlayed = true;
+        // Use spawn sound as alarm for now (or could create dedicated alarm sound)
+        playEdgeCreeperSpawnSound();
+      }
+      
+      // Calculate overall target position based on progress
+      const overallTarget = startPos + (endPos - startPos) * progress;
+      
+      // STEPPING BEHAVIOR
+      if (now >= pauseUntil) {
+        if (!isStretching) {
+          isStretching = true;
+          const stepSize = (Math.random() < 0.5 ? 1 : 2) * (3 + Math.random() * 4);
+          targetPos = Math.min(overallTarget, currentPos + stepSize);
         } else {
-          el.style.top = currentPos + 'px';
+          isStretching = false;
+          const pauseDuration = 200 + Math.random() * 600;
+          pauseUntil = now + pauseDuration;
         }
       }
       
-      // Log progress in debug mode
-      if (EDGE_CREEPER_DEBUG && elapsed - lastLogTime > 2000) {
-        console.log(`[EDGE CREEPER DEBUG] Progress: ${(progress * 100).toFixed(1)}%, pos: ${currentPos.toFixed(1)}, moving: ${shouldMove}`);
-        lastLogTime = elapsed;
+      // SMOOTH MOVEMENT - always move toward overallTarget
+      const distanceToTarget = overallTarget - currentPos;
+      if (Math.abs(distanceToTarget) > 0.5) {
+        // Smooth interpolation toward time-based target
+        currentPos += distanceToTarget * 0.15;
+      } else {
+        currentPos = overallTarget;
       }
       
-      // PERCEPTUAL ENHANCEMENTS (only if not in debug mode)
-      if (!EDGE_CREEPER_DEBUG) {
-        // 1. VISIBILITY PROGRESSION (like Tendrils - harder to see at start)
-        let visibility;
-        if (progress < 0.2) {
-          visibility = 0.15 + (progress / 0.2) * 0.25; // 0.15 → 0.4
-        } else if (progress < 0.5) {
-          visibility = 0.4 + ((progress - 0.2) / 0.3) * 0.3; // 0.4 → 0.7
-        } else {
-          visibility = 0.7 + ((progress - 0.5) / 0.5) * 0.2; // 0.7 → 0.9
-        }
-        
-        // 2. BULGE EFFECT - only when moving, stronger amplitude
-        let bulge = 1;
-        if (shouldMove) {
-          const bulgePhase = (elapsed / 400) % 1; // Bulge cycle
-          bulge = 1 + Math.sin(bulgePhase * Math.PI * 2) * 0.8; // 80% bulge when moving
-        }
-        el.style.transform = `scale(${bulge})`;
-        
-        // 3. Opacity combines visibility + shimmer
-        const shimmer = 0.9 + Math.sin(elapsed * 0.003) * 0.1;
-        el.style.opacity = String(visibility * shimmer);
-        
-        // 4. Shadow when bulging (depth effect)
-        const shadowIntensity = (bulge - 1) * 0.5; // Stronger when bulged
-        el.style.boxShadow = `0 0 ${shadowIntensity * 3}px rgba(255,255,255,${shadowIntensity}), inset 0 0 1px rgba(255,255,255,${visibility * 0.3})`;
+      // SIZE GROWTH CURVE: 25% → 100%
+      const scale = 0.25 + (0.75 * progress);
+      
+      // SHAPE ANIMATION
+      const rotationPart = (axis === 'vertical' ? 'rotate(90deg) ' : '');
+      if (isStretching) {
+        const stretchProgress = Math.min(1, (targetPos - currentPos) / 8);
+        const scaleX = scale * (1 + 0.5 * stretchProgress);
+        const scaleY = scale * (1 - 0.3 * stretchProgress);
+        svg.style.transform = rotationPart + `scale(${scaleX}, ${scaleY})`;
+      } else {
+        const pulsePhase = Math.sin((elapsed / 1000) * Math.PI * 2);
+        const pulseScale = scale * (1 + pulsePhase * 0.06);
+        svg.style.transform = rotationPart + `scale(${pulseScale})`;
       }
       
-      // FAILURE CONDITION: Reached the end
-      if (progress >= 1 && !removed) {
-        removed = true;
-        creepObj.removed = true;
-        clearInterval(creepObj.inchTimer);
-        
-        const penalty = settings.edgeCreepPenalty || 200;
-        score = Math.max(0, score - penalty);
-        misses++;
-        
-        console.log(`[EDGE CREEPER] ✗ FAILURE! Creeper reached end of ${sideNames[side]} edge. Penalty: -${penalty}`);
-        console.log(`[EDGE CREEPER] Final position: ${currentPos.toFixed(1)}, Target: ${endPos}`);
-        
-        showIndicator('-' + penalty, rect.width / 2, rect.height / 2, false);
-        updateHeader();
-        
-        // Damage party in Quest mode
+      // Update position
+      if (axis === 'horizontal') {
+        container.style.left = currentPos + 'px';
+      } else {
+        container.style.top = currentPos + 'px';
+      }
+      
+      // Continue or breach
+      if (!removed && progress < 1) {
+        creepObj.animationFrame = requestAnimationFrame(animateSlimeCrawl);
+      } else if (!removed) {
+        // Reached end - breach!
         if (mode === 'quest') {
           damageParty(settings.edgeCreepDamage || 50);
-          showSpeech('An Edge Creeper breached the perimeter!', '🐛', {ttlMs: 1800});
+          showSpeech('An Edge Stalker breached the perimeter!', '🐛', {ttlMs: 1800});
         } else {
-          showSpeech('Edge Creeper breach!', '⚠️', {ttlMs: 1200});
+          showSpeech('Edge Stalker breach!', '⚠️', {ttlMs: 1200});
         }
         
+        // Large explosion
+        const explosion = document.createElement('div');
+        explosion.style.position = 'absolute';
+        explosion.style.left = container.style.left;
+        explosion.style.top = container.style.top;
+        explosion.style.right = container.style.right;
+        explosion.style.bottom = container.style.bottom;
+        explosion.style.width = '100px';
+        explosion.style.height = '100px';
+        explosion.style.borderRadius = '50%';
+        explosion.style.background = 'rgba(255,255,255,0.9)';
+        explosion.style.pointerEvents = 'none';
+        explosion.style.zIndex = '10001';
+        explosion.style.animation = 'creeperExplosionBreach 0.6s ease-out';
+        gameArea.appendChild(explosion);
+        setTimeout(() => explosion.remove(), 600);
+        
         playMissSound();
-        el.remove();
-        edgeCreepers = edgeCreepers.filter(c => c !== creepObj);
+        
+        container.remove();
+        edgeStalkers = edgeStalkers.filter(c => c !== creepObj);
         return;
       }
-    }, stepIntervalMs);
-    
-    if (EDGE_CREEPER_DEBUG) {
-      console.log('[EDGE CREEPER DEBUG] Starting inching animation');
     }
     
-    edgeCreepers.push(creepObj);
-    
-    if (EDGE_CREEPER_DEBUG) {
-      console.log(`[EDGE CREEPER DEBUG] Total active creepers: ${edgeCreepers.length}`);
-      console.log('[EDGE CREEPER DEBUG] === Creation complete ===');
-    }
+    edgeStalkers.push(creepObj);
+    creepObj.animationFrame = requestAnimationFrame(animateSlimeCrawl);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -2721,7 +2945,7 @@
   // - Proper hit detection along curve path
   //
   function createLineObstacle() {
-    if (TENDRIL_DEBUG) console.log('[TENDRIL] === Creating new Tendril ===');
+    if (DEBUG_MODE) console.log('[TENDRIL] === Creating new Tendril ===');
     
     const rect = gameArea.getBoundingClientRect();
     
@@ -2733,13 +2957,13 @@
     else if (rand < 0.75) type = 'wave';
     else type = 'irregular';
     
-    if (TENDRIL_DEBUG) console.log(`[TENDRIL] Type: ${type.toUpperCase()}`);
+    if (DEBUG_MODE) console.log(`[TENDRIL] Type: ${type.toUpperCase()}`);
     
     // Determine origin edge (tendril will grow from this edge to opposite edge)
     const originEdge = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
     const edgeNames = ['TOP', 'RIGHT', 'BOTTOM', 'LEFT'];
     
-    if (TENDRIL_DEBUG) console.log(`[TENDRIL] Origin edge: ${edgeNames[originEdge]}`);
+    if (DEBUG_MODE) console.log(`[TENDRIL] Origin edge: ${edgeNames[originEdge]}`);
     
     // Generate path points based on type
     let pathPoints;
@@ -2777,7 +3001,7 @@
     // Styling - layered rendering for contour detection
     const bgRgb = hexToRgb(settings.bgColor);
     
-    if (TENDRIL_DEBUG) {
+    if (DEBUG_MODE) {
       // Debug mode: bright colors for visibility
       shadowPath.setAttribute('stroke', '#FF0000');
       shadowPath.setAttribute('stroke-width', '4');
@@ -2833,7 +3057,7 @@
     svg.appendChild(hitPath);
     
     // Debug visualization of hit area
-    if (TENDRIL_DEBUG) {
+    if (DEBUG_MODE) {
       const debugHit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       debugHit.setAttribute('d', pathD);
       debugHit.setAttribute('stroke', 'rgba(255,0,255,0.3)');
@@ -2845,10 +3069,15 @@
     
     gameArea.appendChild(svg);
     
+    // Play subtle spawn sound
+    playTendrilSpawnSound();
+    
     // Animation parameters
     const growthDuration = 4000 + Math.random() * 3000; // 4-7 seconds to fully grow
     const lifetimeDuration = growthDuration + 6000; // Lives 6 seconds after growth
     const startTime = performance.now();
+    let pausedAt = 0;
+    let totalPausedTime = 0;
     let clicked = false;
     let expired = false;
     
@@ -2873,7 +3102,7 @@
     
     // Debug info overlay
     let debugText;
-    if (TENDRIL_DEBUG) {
+    if (DEBUG_MODE) {
       debugText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       debugText.setAttribute('x', pathPoints[Math.floor(pathPoints.length / 2)].x);
       debugText.setAttribute('y', pathPoints[Math.floor(pathPoints.length / 2)].y - 10);
@@ -2904,6 +3133,9 @@
       totalPointsFromHits += pts;
       consecutiveMisses = 0;
       
+      // Side quest tracking for Tendril kill
+      checkSideQuests({tendrilKill: true});
+      
       console.log(`[TENDRIL] ✓ HIT! Type: ${type}, Progress: ${(progress * 100).toFixed(1)}%, Points: ${pts}`);
       
       // Visual feedback at click position
@@ -2916,26 +3148,32 @@
       updateHeader();
       playTendrilHitSound(); // Unique sound for Tendrils
       
-      // Flash and remove
-      svg.style.opacity = '0.8';
+      // RED FADE-OUT (FF6/Chrono Trigger style)
+      svg.classList.add('dying-red');
       setTimeout(() => {
-        svg.style.opacity = '0';
-        setTimeout(() => {
-          svg.remove();
-          lineObstacles = lineObstacles.filter(l => l !== lineObj);
-        }, 200);
-      }, 100);
+        svg.remove();
+        lineObstacles = lineObstacles.filter(l => l !== lineObj);
+      }, 600); // Match red-fade animation duration
     });
     
     // Animation loop
     function animate(now) {
       if (clicked || expired) return;
       if (paused || !running) {
+        if (!pausedAt) {
+          pausedAt = now;
+        }
         requestAnimationFrame(animate);
         return;
       }
       
-      const elapsed = now - startTime;
+      // Track pause time
+      if (pausedAt) {
+        totalPausedTime += (now - pausedAt);
+        pausedAt = 0;
+      }
+      
+      const elapsed = now - startTime - totalPausedTime;
       const growthProgress = Math.min(1, elapsed / growthDuration);
       const lifetimeProgress = Math.min(1, elapsed / lifetimeDuration);
       
@@ -2946,7 +3184,7 @@
       highlightPath.setAttribute('stroke-dashoffset', dashOffset);
       
       // Visibility curve: starts low, increases over time
-      if (!TENDRIL_DEBUG) {
+      if (!DEBUG_MODE) {
         let visibility;
         if (lifetimeProgress < 0.3) {
           // First 30%: fade in from barely visible
@@ -2965,14 +3203,14 @@
       const pulsePhase = (elapsed / 1000) * Math.PI; // 1 second cycle
       const thicknessVariance = 1 + Math.sin(pulsePhase) * 0.15; // ±15%
       
-      if (!TENDRIL_DEBUG) {
+      if (!DEBUG_MODE) {
         shadowPath.setAttribute('stroke-width', String(2.5 * thicknessVariance));
         bodyPath.setAttribute('stroke-width', String(2 * thicknessVariance));
         highlightPath.setAttribute('stroke-width', String(1 * thicknessVariance));
       }
       
       // Debug info
-      if (TENDRIL_DEBUG && debugText) {
+      if (DEBUG_MODE && debugText) {
         const currentPts = Math.round(50 - (lifetimeProgress * 40));
         const visPercent = (lifetimeProgress * 100).toFixed(0);
         debugText.textContent = `${type} | ${currentPts}pts | ${visPercent}%`;
@@ -3001,12 +3239,14 @@
           showSpeech('Tendril breach!', '⚡', {ttlMs: 1200});
         }
         
-        // Flash and remove
-        svg.style.opacity = '0';
+        // WHITE LIGHTNING FILL (JRPG-style)
+        svg.classList.add('lightning-flash');
+        
+        // Remove after animation
         setTimeout(() => {
           svg.remove();
           lineObstacles = lineObstacles.filter(l => l !== lineObj);
-        }, 300);
+        }, 500); // Match lightning animation duration
         return;
       }
       
@@ -4287,6 +4527,123 @@
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // SIDE QUESTS SYSTEM - Appear in all game modes
+  // ═══════════════════════════════════════════════════════════════════════════════
+  
+  function startSideQuests() {
+    // Pick 3 random quests from the pool
+    const shuffled = [...SIDE_QUEST_POOL].sort(() => Math.random() - 0.5);
+    sideQuestsActive = shuffled.slice(0, 3).map(q => ({
+      ...q,
+      completed: false,
+      startTime: Date.now(),
+      scoreAtStart: q.scoreGoal ? score : null,
+      streakAtStart: q.needHitStreak || q.needEarliestStreak ? 0 : null,
+      killCount: 0
+    }));
+    
+    sideQuestTimeRemaining = SIDE_QUEST_DURATION;
+    sideQuestStartTime = Date.now();
+    
+    // Render quests
+    updateSideQuestsUI();
+    
+    // Start countdown timer
+    if (sideQuestTimer) clearInterval(sideQuestTimer);
+    sideQuestTimer = setInterval(() => {
+      if (paused || !running) return;
+      
+      sideQuestTimeRemaining = Math.max(0, SIDE_QUEST_DURATION - (Date.now() - sideQuestStartTime));
+      updateSideQuestsUI();
+      
+      // Time's up - refresh quests
+      if (sideQuestTimeRemaining <= 0) {
+        startSideQuests();
+      }
+    }, 100);
+  }
+  
+  function updateSideQuestsUI() {
+    if (!sqMissionsEl || !sqTimerEl) return;
+    
+    const seconds = Math.ceil(sideQuestTimeRemaining / 1000);
+    sqTimerEl.textContent = `${seconds}s`;
+    
+    sqMissionsEl.innerHTML = sideQuestsActive.map(q => `
+      <div class="sq-mission ${q.completed ? 'completed' : ''}">
+        <span class="icon">${q.completed ? '✓' : q.icon}</span>
+        <span class="text">${q.text}</span>
+      </div>
+    `).join('');
+  }
+  
+  function checkSideQuests(context = {}) {
+    sideQuestsActive.forEach(q => {
+      if (q.completed) return;
+      
+      let complete = false;
+      
+      // Check various completion conditions
+      if (q.check && q.check()) {
+        complete = true;
+      } else if (context.hit && q.onHit) {
+        complete = q.onHit(context.points || 0);
+      } else if (context.tendrilKill && q.needTendrilKills) {
+        q.killCount++;
+        complete = q.killCount >= q.needTendrilKills;
+      } else if (context.edgeCreepKill && q.needEdgeCreepKills) {
+        q.killCount++;
+        complete = q.killCount >= q.needEdgeCreepKills;
+      } else if (context.drifterKill && q.needDrifterKills) {
+        q.killCount++;
+        complete = q.killCount >= q.needDrifterKills;
+      } else if (context.hitStreak && q.needHitStreak) {
+        complete = context.hitStreak >= q.needHitStreak;
+      } else if (context.earliestStreak && q.needEarliestStreak) {
+        complete = context.earliestStreak >= q.needEarliestStreak;
+      } else if (q.scoreGoal && q.window) {
+        const elapsed = Date.now() - q.startTime;
+        const scoreGained = score - q.scoreAtStart;
+        if (elapsed <= q.window && scoreGained >= q.scoreGoal) {
+          complete = true;
+        } else if (elapsed > q.window) {
+          // Window expired, reset
+          q.scoreAtStart = score;
+          q.startTime = Date.now();
+        }
+      } else if (q.duration) {
+        // No-miss quests
+        const elapsed = Date.now() - q.startTime;
+        if (context.miss) {
+          // Reset timer on miss
+          q.startTime = Date.now();
+        } else if (elapsed >= q.duration) {
+          complete = true;
+        }
+      }
+      
+      if (complete) {
+        q.completed = true;
+        score += 100; // Bonus for completing side quest
+        showSpeech('Side Quest Complete! +100 bonus', '⭐', {ttlMs: 1500});
+        playStreakSound();
+        updateHeader();
+      }
+    });
+    
+    updateSideQuestsUI();
+  }
+  
+  function stopSideQuests() {
+    if (sideQuestTimer) {
+      clearInterval(sideQuestTimer);
+      sideQuestTimer = null;
+    }
+    sideQuestsActive = [];
+    if (sideQuestsPanel) sideQuestsPanel.style.display = 'none';
+  }
+
   // UI binding
   function bindUI() {
     modeTimeBtn.addEventListener('click', () => startGame('time'));
@@ -4310,21 +4667,65 @@
         
         // Populate current settings
         if (taNormalCheck) taNormalCheck.checked = settings.timeAttackSettings.normalPatches;
-        if (taFadersCheck) taFadersCheck.checked = settings.timeAttackSettings.faders;
         if (taDriftersCheck) taDriftersCheck.checked = settings.timeAttackSettings.drifters;
         if (taLinesCheck) taLinesCheck.checked = settings.timeAttackSettings.lines;
         if (taShrinkingCheck) taShrinkingCheck.checked = settings.timeAttackSettings.shrinking;
-        if (taEdgeCreepersCheck) taEdgeCreepersCheck.checked = settings.timeAttackSettings.edgeCreepers || false;
+        if (taEdgeCreepersCheck) taEdgeCreepersCheck.checked = settings.timeAttackSettings.edgeStalkers || false;
+        if (taRandomCheck) taRandomCheck.checked = settings.timeAttackSettings.random || false;
+        if (taTimeLimitInput) {
+          taTimeLimitInput.value = settings.timeAttackSettings.timeLimit || 1;
+          if (taTimeLimitVal) taTimeLimitVal.textContent = settings.timeAttackSettings.timeLimit || 1;
+        }
+      });
+      
+      // Update time limit display when slider changes
+      if (taTimeLimitInput && taTimeLimitVal) {
+        taTimeLimitInput.addEventListener('input', () => {
+          taTimeLimitVal.textContent = taTimeLimitInput.value;
+        });
+      }
+      
+      // MUTUAL EXCLUSIVITY: Random vs Manual Selection
+      // When Random is checked, uncheck all manual selections
+      if (taRandomCheck) {
+        taRandomCheck.addEventListener('change', () => {
+          if (taRandomCheck.checked) {
+            // Uncheck all manual selections when Random is enabled
+            if (taDriftersCheck) taDriftersCheck.checked = false;
+            if (taLinesCheck) taLinesCheck.checked = false;
+            if (taShrinkingCheck) taShrinkingCheck.checked = false;
+            if (taEdgeCreepersCheck) taEdgeCreepersCheck.checked = false;
+          }
+        });
+      }
+      
+      // When any manual selection is checked, uncheck Random
+      const taManualCheckboxes = [taDriftersCheck, taLinesCheck, taShrinkingCheck, taEdgeCreepersCheck];
+      taManualCheckboxes.forEach(checkbox => {
+        if (checkbox) {
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked && taRandomCheck) {
+              taRandomCheck.checked = false;
+            }
+          });
+        }
       });
       
       if (taSaveBtn) {
         taSaveBtn.addEventListener('click', () => {
           settings.timeAttackSettings.normalPatches = taNormalCheck ? taNormalCheck.checked : true;
-          settings.timeAttackSettings.faders = taFadersCheck ? taFadersCheck.checked : true;
           settings.timeAttackSettings.drifters = taDriftersCheck ? taDriftersCheck.checked : true;
           settings.timeAttackSettings.lines = taLinesCheck ? taLinesCheck.checked : false;
           settings.timeAttackSettings.shrinking = taShrinkingCheck ? taShrinkingCheck.checked : true;
-          settings.timeAttackSettings.edgeCreepers = taEdgeCreepersCheck ? taEdgeCreepersCheck.checked : false;
+          settings.timeAttackSettings.edgeStalkers = taEdgeCreepersCheck ? taEdgeCreepersCheck.checked : false;
+          settings.timeAttackSettings.random = taRandomCheck ? taRandomCheck.checked : false;
+          settings.timeAttackSettings.timeLimit = taTimeLimitInput ? parseInt(taTimeLimitInput.value) : 1;
+          
+          // Update the main menu button text
+          if (timeAttackDurationSpan) {
+            timeAttackDurationSpan.textContent = settings.timeAttackSettings.timeLimit;
+          }
+          
           saveSettingsToStorage();
           timeAttackPanel.classList.add('hidden');
           startScreen.classList.remove('hidden');
@@ -4339,23 +4740,252 @@
       }
     }
 
+    // Infinite Struggle customization
+    if (infiniteCustomizeBtn && infinitePanel) {
+      infiniteCustomizeBtn.addEventListener('click', () => {
+        startScreen.classList.add('hidden');
+        settingsPanel.classList.add('hidden');
+        timeAttackPanel.classList.add('hidden');
+        infinitePanel.classList.remove('hidden');
+        
+        // Populate current settings
+        if (infAutoEvolveCheck) infAutoEvolveCheck.checked = settings.infiniteSettings.autoEvolve;
+        if (infNormalCheck) infNormalCheck.checked = settings.infiniteSettings.normalPatches;
+        if (infDriftersCheck) infDriftersCheck.checked = settings.infiniteSettings.drifters;
+        if (infLinesCheck) infLinesCheck.checked = settings.infiniteSettings.lines;
+        if (infShrinkingCheck) infShrinkingCheck.checked = settings.infiniteSettings.shrinking;
+        if (infEdgeCreepersCheck) infEdgeCreepersCheck.checked = settings.infiniteSettings.edgeStalkers || false;
+      });
+      
+      // MUTUAL EXCLUSIVITY: Progressive vs Manual Selection
+      // When Progressive is checked, uncheck all manual selections
+      if (infAutoEvolveCheck) {
+        infAutoEvolveCheck.addEventListener('change', () => {
+          if (infAutoEvolveCheck.checked) {
+            // Uncheck all manual selections when Progressive is enabled
+            if (infDriftersCheck) infDriftersCheck.checked = false;
+            if (infLinesCheck) infLinesCheck.checked = false;
+            if (infShrinkingCheck) infShrinkingCheck.checked = false;
+            if (infEdgeCreepersCheck) infEdgeCreepersCheck.checked = false;
+          }
+        });
+      }
+      
+      // When any manual selection is checked, uncheck Progressive
+      const manualCheckboxes = [infDriftersCheck, infLinesCheck, infShrinkingCheck, infEdgeCreepersCheck];
+      manualCheckboxes.forEach(checkbox => {
+        if (checkbox) {
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked && infAutoEvolveCheck) {
+              infAutoEvolveCheck.checked = false;
+            }
+          });
+        }
+      });
+      
+      if (infSaveBtn) {
+        infSaveBtn.addEventListener('click', () => {
+          settings.infiniteSettings.autoEvolve = infAutoEvolveCheck ? infAutoEvolveCheck.checked : false;
+          settings.infiniteSettings.normalPatches = infNormalCheck ? infNormalCheck.checked : false;
+          settings.infiniteSettings.drifters = infDriftersCheck ? infDriftersCheck.checked : false;
+          settings.infiniteSettings.lines = infLinesCheck ? infLinesCheck.checked : false;
+          settings.infiniteSettings.shrinking = infShrinkingCheck ? infShrinkingCheck.checked : false;
+          settings.infiniteSettings.edgeStalkers = infEdgeCreepersCheck ? infEdgeCreepersCheck.checked : false;
+          saveSettingsToStorage();
+          infinitePanel.classList.add('hidden');
+          startScreen.classList.remove('hidden');
+        });
+      }
+      
+      if (infCancelBtn) {
+        infCancelBtn.addEventListener('click', () => {
+          infinitePanel.classList.add('hidden');
+          startScreen.classList.remove('hidden');
+        });
+      }
+    }
+
     phoneToggleBtn.addEventListener('click', () => {
       phoneMode = !phoneMode;
       applyArenaDimensions();
     });
+    
+    // Debug mode toggle
+    const debugToggleBtn = document.getElementById('debug-toggle');
+    if (debugToggleBtn) {
+      debugToggleBtn.addEventListener('click', () => {
+        DEBUG_MODE = !DEBUG_MODE;
+        debugToggleBtn.textContent = DEBUG_MODE ? 'Debug: On' : 'Debug: Off';
+        debugToggleBtn.style.background = DEBUG_MODE ? 'rgba(255, 0, 0, 0.2)' : 'var(--bg-dark)';
+        debugToggleBtn.style.color = DEBUG_MODE ? 'yellow' : '';
+        
+        // Show notification
+        const notif = document.createElement('div');
+        notif.className = 'debug-notification';
+        notif.textContent = DEBUG_MODE ? '🔴 Debug Mode: All enemies now bright red/yellow' : '✓ Debug Mode: Off';
+        notif.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: ' + (DEBUG_MODE ? 'yellow' : 'white') + '; padding: 20px 40px; border-radius: 8px; font-size: 18px; z-index: 100000; border: 2px solid ' + (DEBUG_MODE ? 'red' : 'green') + ';';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 2000);
+      });
+    }
     
     // Hide phone toggle on actual mobile devices
     if (isMobileDevice) {
       phoneToggleBtn.style.display = 'none';
     }
 
+    // Vision health tips for pause modal
+    const visionTips = [
+      "Take regular breaks using the 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds.",
+      "Blink frequently to prevent dry eyes. We blink less when focusing on screens.",
+      "Adjust your screen brightness to match your surroundings to reduce eye strain.",
+      "Position your screen 20-26 inches from your eyes, slightly below eye level.",
+      "Use artificial tears if your eyes feel dry during extended screen time.",
+      "Ensure proper lighting - avoid glare and overly bright or dim environments.",
+      "Consider the 10-10-10 rule: every 10 minutes, look 10 feet away for 10 seconds.",
+      "Stay hydrated - drinking water helps maintain moisture in your eyes.",
+      "Adjust text size and contrast for comfortable reading without squinting.",
+      "Get regular eye exams to detect vision changes early.",
+      "Reduce blue light exposure in the evening to improve sleep quality.",
+      "Practice eye exercises: roll your eyes, focus near and far, trace figure-8s.",
+      "Keep your screen clean to reduce glare and improve clarity.",
+      "Use the palm method: rub hands together, cup over closed eyes for 30 seconds.",
+      "Maintain good posture to reduce neck strain which can affect vision.",
+      "Eat foods rich in omega-3, vitamin A, and lutein for eye health.",
+      "Limit screen time before bed to improve sleep and reduce eye fatigue.",
+      "Use a humidifier in dry environments to prevent eye irritation.",
+      "Avoid rubbing your eyes - it can cause irritation and spread germs.",
+      "Give your eyes a workout: practice focusing on objects at varying distances."
+    ];
+
+    let pauseModalOverlay = null;
+
+    function showPauseModal() {
+      // Remove any existing modal first
+      if (pauseModalOverlay) {
+        pauseModalOverlay.remove();
+      }
+      
+      const overlay = document.createElement('div');
+      overlay.className = 'story-dialog-overlay pause-modal-overlay';
+      overlay.style.background = 'rgba(0,0,0,0.85)';
+      overlay.style.pointerEvents = 'none'; // Don't block clicks outside dialog
+      pauseModalOverlay = overlay;
+      
+      const dialog = document.createElement('div');
+      dialog.className = 'story-dialog pause-modal';
+      dialog.style.maxWidth = '500px';
+      dialog.style.padding = '24px';
+      dialog.style.pointerEvents = 'auto'; // Allow clicks on dialog
+      
+      const title = document.createElement('div');
+      title.className = 'pause-title';
+      title.style.fontSize = '24px';
+      title.style.fontWeight = 'bold';
+      title.style.marginBottom = '16px';
+      title.style.textAlign = 'center';
+      title.textContent = '⏸ Game Paused';
+      
+      const tip = document.createElement('div');
+      tip.className = 'vision-tip';
+      tip.style.fontSize = '15px';
+      tip.style.lineHeight = '1.6';
+      tip.style.marginBottom = '20px';
+      tip.style.padding = '16px';
+      tip.style.background = 'rgba(110,168,255,0.1)';
+      tip.style.borderRadius = '8px';
+      tip.style.borderLeft = '4px solid var(--accent)';
+      
+      const randomTip = visionTips[Math.floor(Math.random() * visionTips.length)];
+      tip.innerHTML = `<strong>👁️ Vision Health Tip:</strong><br>${randomTip}`;
+      
+      const resumeBtn = document.createElement('button');
+      resumeBtn.className = 'btn';
+      resumeBtn.style.width = '100%';
+      resumeBtn.style.padding = '12px';
+      resumeBtn.textContent = '▶️ Resume Game';
+      resumeBtn.onclick = () => {
+        hidePauseModal();
+        // Manually unpause without triggering click event
+        resumeGame();
+      };
+      
+      dialog.appendChild(title);
+      dialog.appendChild(tip);
+      dialog.appendChild(resumeBtn);
+      overlay.appendChild(dialog);
+      document.body.appendChild(overlay);
+    }
+
+    function hidePauseModal() {
+      if (pauseModalOverlay) {
+        pauseModalOverlay.remove();
+        pauseModalOverlay = null;
+      }
+    }
+
+    function resumeGame() {
+      if (!paused || !running) return;
+      
+      paused = false;
+      pauseResumeBtn.textContent = '⏸';
+      pauseResumeBtn.title = 'Pause';
+      
+      // Resume what was running before pause
+      const pausedState = window._pausedState || {};
+      
+      // Resume spawning if it was active
+      if (pausedState.hadSpawnTimer) {
+        const freqMs = settings.spawnSecs * 1000;
+        spawnTimer = setInterval(() => {
+          if (paused || !running) return;
+          if (activeTargets.size >= settings.maxConcurrent) return;
+          checkProgressiveUnlocks();
+          createTargetInstance();
+        }, freqMs);
+      }
+      
+      // Resume Tendrils if they were active and should still spawn
+      if (pausedState.hadLineSpawnTimer && shouldSpawnTendrils()) {
+        startLineObstacles();
+      }
+      
+      // Resume Edge Stalkers if they were active and should still spawn
+      if (pausedState.hadEdgeCreepSpawnTimer && shouldSpawnEdgeCreepers()) {
+        startEdgeCreepers();
+      }
+      
+      // Resume party events if active
+      if (pausedState.hadPartyEventTimer && mode === 'quest') {
+        startPartyEvents();
+      }
+      
+      // Resume audio
+      if (audioCtx) audioCtx.resume();
+      
+      window._pausedState = null;
+    }
+
     pauseResumeBtn.addEventListener('click', () => {
       if (!running) return;
-      paused = !paused;
-      pauseResumeBtn.textContent = paused ? 'Resume' : 'Pause';
       
-      // Freeze ALL game mechanics when paused
-      if (paused) {
+      if (!paused) {
+        // PAUSING
+        paused = true;
+        pauseResumeBtn.textContent = '▶️';
+        pauseResumeBtn.title = 'Resume';
+        
+        // Show pause modal with vision tip
+        showPauseModal();
+        
+        // Track what was running before pause
+        window._pausedState = {
+          hadSpawnTimer: !!spawnTimer,
+          hadLineSpawnTimer: !!lineSpawnTimer,
+          hadEdgeCreepSpawnTimer: !!edgeCreepSpawnTimer,
+          hadPartyEventTimer: !!partyEventTimer
+        };
+        
         // Pause spawning
         if (spawnTimer) {
           clearInterval(spawnTimer);
@@ -4376,7 +5006,7 @@
           clearInterval(lineSpawnTimer);
           lineSpawnTimer = null;
         }
-        // Pause Edge Creepers
+        // Pause Edge Stalkers
         if (edgeCreepSpawnTimer) {
           clearInterval(edgeCreepSpawnTimer);
           edgeCreepSpawnTimer = null;
@@ -4391,27 +5021,18 @@
           // Timer will continue but not decrement due to paused check in tick function
         }
       } else {
-        // Resume spawning
-        startSpawning();
-        // Resume audio
-        if (audioCtx) audioCtx.resume();
-        // Resume line obstacles if they should be active
-        if (shouldSpawnTendrils()) {
-          startLineObstacles();
-        }
-        // Resume Edge Creepers if they should be active
-        if (shouldSpawnEdgeCreepers()) {
-          startEdgeCreepers();
-        }
-        // Resume party events if Quest mode
-        if (mode === 'quest') {
-          startPartyEvents();
-        }
+        // RESUMING
+        hidePauseModal();
+        resumeGame();
       }
     });
 
     backToMenuBtn.addEventListener('click', () => {
-      stopSpawning();
+      // CRITICAL: Stop ALL spawning before returning to menu
+      hidePauseModal(); // Remove pause modal if showing
+      paused = false; // Reset pause state
+      running = false; // Stop game
+      stopSpawning(); // This clears all timers
       stopTimer();
       clearAllTargets();
       gameShell.classList.add('hidden');
@@ -4429,8 +5050,8 @@
 
     if (questPanelToggleBtn) {
       questPanelToggleBtn.addEventListener('click', () => {
-        const hidden = questPanel.classList.toggle('hidden');
-        questPanelToggleBtn.textContent = hidden ? 'Objectives: Off' : 'Objectives: On';
+        questPanel.classList.toggle('hidden');
+        // Icon button doesn't need text updates
       });
     }
 
@@ -4506,7 +5127,12 @@
     endRetryBtn.addEventListener('click', () => { endScreen.classList.add('hidden'); startGame(mode || 'time'); });
     endMenuBtn.addEventListener('click', () => { endScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); gameShell.classList.add('hidden'); if (settings.musicEnabled) startMusic('menu'); });
 
-    document.addEventListener('keydown', (ev) => { if (ev.code === 'Space' && running) { paused = !paused; pauseResumeBtn.textContent = paused ? 'Resume' : 'Pause'; if (audioCtx) paused ? audioCtx.suspend() : audioCtx.resume(); } });
+    document.addEventListener('keydown', (ev) => { 
+      if (ev.code === 'Space' && running) { 
+        ev.preventDefault();
+        pauseResumeBtn.click(); // Use the button's click handler for consistency
+      } 
+    });
     window.addEventListener('resize', () => applyArenaDimensions());
   }
 
@@ -4514,6 +5140,12 @@
   populateSettingsUI();
   updateHighScoreDisplays();
   bindUI();
+  
+  // Initialize Time Attack duration display
+  if (timeAttackDurationSpan) {
+    timeAttackDurationSpan.textContent = settings.timeAttackSettings.timeLimit || 1;
+  }
+  
   applyArenaDimensions();
   setInterval(updateHeader, 300);
   updateQuestContinueButton();
@@ -4600,11 +5232,46 @@
     });
   }
 
+  function showLevelCompleteModal(completedLevel, onContinue) {
+    // Pause game
+    paused = true;
+    running = false;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'story-dialog-overlay mission-briefing';
+    overlay.style.zIndex = '99999';
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'story-dialog';
+    dialog.style.maxWidth = '500px';
+    
+    dialog.innerHTML = `
+      <div class="mission-title jrpg">\ud83c\udf96\ufe0f Level ${completedLevel} Complete!</div>
+      <div class="mission-dialogue" style="margin: 20px 0; font-size: 15px;">
+        <p>Objectives achieved. The party regroups and prepares for the next challenge.</p>
+        <p style="color: var(--good); font-weight: 700;">Party healed +50 HP</p>
+      </div>
+      <div class="decision-buttons">
+        <button class="btn decision-btn" id="level-continue-btn">Continue to Level ${completedLevel + 1}</button>
+      </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    document.getElementById('level-continue-btn').addEventListener('click', () => {
+      overlay.remove();
+      paused = false;
+      running = true;
+      if (onContinue) onContinue();
+    });
+  }
+
   function objectiveTooltip(o){
     switch(o.type){
       case 'scoreAtLeast': return `Reach a total score of at least ${o.target} this run.`;
-      case 'earliestAtLeast': return `Achieve a single click worth ≥ ${o.target} points.`;
-      case 'streakAtLeast': return `Chain ${o.target} consecutive clicks each worth ≥ 20 points.`;
+      case 'earliestAtLeast': return `Achieve a single click worth \u2265 ${o.target} points.`;
+      case 'streakAtLeast': return `Chain ${o.target} consecutive clicks each worth \u2265 20 points.`;
       case 'hitsAtLeast': return `Land at least ${o.target} total hits.`;
       default: return 'Keep sharpening your focus to progress.';
     }
@@ -4615,15 +5282,24 @@
     const allDone = questState.objectives.every(o=>o.done);
     if (allDone) {
       showSpeech(questState.story.clear, '🎖️');
-      questState.level++;
-      if (questState.level > 5) {
+      
+      // Show level completion modal
+      if (questState.level >= 5) {
+        // Final victory
         showSpeech(questState.story.finale, '🏆', { ttlMs: 2400 });
-        // stop quest after brief flourish
         setTimeout(()=> { endGame(); clearQuestState(); }, 1600);
       } else {
-        questState.objectives = makeObjectives(questState.level);
-        updateQuestObjectivesUI();
-        saveQuestState();
+        // Level complete - show modal and advance
+        showLevelCompleteModal(questState.level, () => {
+          questState.level++;
+          questState.objectives = makeObjectives(questState.level);
+          updateQuestObjectivesUI();
+          saveQuestState();
+          
+          // Heal party between levels
+          healParty(50);
+          showSpeech(`Level ${questState.level} - ${questState.story.intro}`, '⚔️', {ttlMs: 2200});
+        });
       }
     }
   }

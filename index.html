@@ -18,15 +18,17 @@
       <h1 class="title jrpg">EyeSoar</h1>
 
       <div class="menu">
-        <button class="menu-btn" id="mode-time">Time Attack (1 minute)</button>
+        <button class="menu-btn" id="mode-time">Time Attack (<span id="time-attack-duration">1</span> minute)</button>
         <button class="menu-btn ghost" id="time-attack-customize">⚙️ Customize Time Attack</button>
         <button class="menu-btn" id="mode-infinite">Infinite Struggle</button>
+        <button class="menu-btn ghost" id="infinite-customize">⚙️ Customize Infinite Struggle</button>
         <button class="menu-btn" id="mode-quest">Quest Mode</button>
         <button class="menu-btn ghost hidden" id="mode-quest-continue">Continue Quest</button>
 
         <div class="menu-row">
           <button class="menu-btn ghost" id="open-settings">Settings</button>
           <button class="menu-btn ghost" id="phone-toggle">Phone Screen: Off</button>
+          <button class="menu-btn ghost" id="debug-toggle" style="background: var(--bg-dark);">Debug: Off</button>
         </div>
 
         <div class="highscores">
@@ -47,14 +49,18 @@
       </p>
 
       <div class="form-grid">
-        <label class="field checkbox-field">
-          <input type="checkbox" id="ta-normal" checked />
-          <span>Normal Patches (standard fade-in)</span>
+        <label class="field checkbox-field" style="grid-column: 1 / -1;">
+          <input type="checkbox" id="ta-random" />
+          <span><strong>Random Selection</strong> (all enemy types randomly appear - ignores manual selection below)</span>
         </label>
 
-        <label class="field checkbox-field">
-          <input type="checkbox" id="ta-faders" checked />
-          <span>Fader Patches (fade in & out)</span>
+        <div style="grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin: 8px 0;">
+          Or manually select enemies (only used if Random is OFF):
+        </div>
+
+        <label class="field checkbox-field" style="opacity: 0.6; cursor: not-allowed;">
+          <input type="checkbox" id="ta-normal" checked disabled />
+          <span>Normal Patches (always active)</span>
         </label>
 
         <label class="field checkbox-field">
@@ -73,8 +79,14 @@
         </label>
         
         <label class="field checkbox-field">
-          <input type="checkbox" id="ta-edge-creepers" />
-          <span>Edge Creepers (peripheral threats)</span>
+          <input type="checkbox" id="ta-edge-stalkers" />
+          <span>Edge Stalkers (peripheral threats)</span>
+        </label>
+
+        <label class="field" style="grid-column: 1 / -1; margin-top: 12px;">
+          Time Limit (minutes)
+          <input id="ta-time-limit" type="range" min="1" max="10" step="1" value="1" />
+          <div class="meta"><span id="ta-time-limit-val">1</span> minute(s)</div>
         </label>
       </div>
 
@@ -84,29 +96,80 @@
       </div>
     </div>
 
+    <!-- Infinite Struggle Customization Panel -->
+    <div id="infinite-panel" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="infinite-title">
+      <h2 id="infinite-title" class="jrpg">Infinite Struggle Setup</h2>
+      
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+        Choose your challenge mode and enemies:
+      </p>
+
+      <div class="form-grid">
+        <label class="field checkbox-field" style="grid-column: 1 / -1;">
+          <input type="checkbox" id="inf-auto-evolve" />
+          <span><strong>Progressive Evolution</strong> (enemies unlock based on score - ignores manual selection below)</span>
+        </label>
+
+        <div style="grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin: 8px 0;">
+          Or manually select enemies (only used if Progressive Evolution is OFF):
+        </div>
+
+        <label class="field checkbox-field" style="opacity: 0.6; cursor: not-allowed;">
+          <input type="checkbox" id="inf-normal" checked disabled />
+          <span>Normal Patches (always active)</span>
+        </label>
+
+        <label class="field checkbox-field">
+          <input type="checkbox" id="inf-drifters" />
+          <span>Drifter Patches</span>
+        </label>
+        
+        <label class="field checkbox-field">
+          <input type="checkbox" id="inf-shrinking" />
+          <span>Shrinking Patches</span>
+        </label>
+
+        <label class="field checkbox-field">
+          <input type="checkbox" id="inf-lines" />
+          <span>Dark Tendrils</span>
+        </label>
+        
+        <label class="field checkbox-field">
+          <input type="checkbox" id="inf-edge-stalkers" />
+          <span>Edge Stalkers</span>
+        </label>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn" id="inf-save">Save & Close</button>
+        <button class="btn ghost" id="inf-cancel">Cancel</button>
+      </div>
+    </div>
+
     <!-- Game Container (full window by default) -->
     <div id="game-shell" class="hidden">
 
       <header class="topbar jrpg" role="banner" aria-label="Game status">
-        <div class="left">
-          <div class="brand">EyeSoar</div>
-          <div class="mode" id="current-mode">Mode: —</div>
+        <div class="topbar-header">
+          <div class="left">
+            <div class="game-title">EyeSoar</div>
+            <div class="game-mode" id="current-mode">Mode: —</div>
+          </div>
+          <div class="controls topbar-controls">
+            <button class="btn btn-icon" id="pause-resume" title="Pause">⏸</button>
+            <button class="btn btn-icon" id="settings-in-game" title="Settings">⚙️</button>
+            <button class="btn btn-icon ghost" id="quest-panel-toggle" title="Toggle Objectives">📋</button>
+            <button class="btn btn-icon ghost" id="back-to-menu" title="Exit to Menu">🏠</button>
+          </div>
         </div>
 
-        <div class="stats" aria-live="polite">
+        <div class="stats scoreboard" aria-live="polite">
           <div class="stat stat-large">Score <div class="stat-value" id="score">0</div></div>
           <div class="stat">Avg <div class="stat-value small" id="avg">0.00</div></div>
           <div class="stat">Hits <div class="stat-value small" id="hits">0</div></div>
           <div class="stat">Misses <div class="stat-value small" id="misses">0</div></div>
           <div class="stat">Earliest <div class="stat-value small" id="earliest">0</div></div>
           <div class="stat time" id="time-left" aria-hidden="true"></div>
-        </div>
-
-        <div class="controls">
-          <button class="btn" id="pause-resume">Pause</button>
-          <button class="btn ghost" id="back-to-menu">Menu</button>
-          <button class="btn ghost" id="settings-in-game">Settings</button>
-          <button class="btn ghost" id="quest-panel-toggle">Objectives: On</button>
         </div>
       </header>
 
@@ -116,6 +179,15 @@
       <div id="quest-panel" class="hidden" aria-live="polite">
         <div class="qp-title">Quest Objectives</div>
         <ul id="quest-objectives"></ul>
+      </div>
+      
+      <!-- Side Quests panel (appears in all modes) -->
+      <div id="side-quests-panel" aria-live="polite">
+        <div class="sq-header">
+          <div class="sq-title">Side Quests</div>
+          <div class="sq-timer" id="sq-timer">30s</div>
+        </div>
+        <div class="sq-missions" id="sq-missions"></div>
       </div>
       
       <!-- Party members display (peripheral) -->

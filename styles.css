@@ -41,43 +41,52 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 
 /* Game shell: occupy full browser window by default */
 #game-shell{
-  width:100vw;
+  width:100%;
   height:100vh;
   display:flex;
   flex-direction:column;
   background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+  overflow:hidden;
 }
 
 /* Topbar */
 .topbar{
-  height:var(--topbar-h);
+  min-height:var(--topbar-h);
   display:flex;
-  align-items:center;
-  gap:16px;
-  padding:10px 18px;
+  flex-direction: column;
+  gap:8px;
+  padding:8px 12px;
   border-bottom:1px solid rgba(0,0,0,0.04);
-  justify-content:space-between;
+  background: rgba(255,255,255,0.02);
+}
+.topbar-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .topbar .left{display:flex;flex-direction:column}
-.brand{font-weight:700;color:#0f172a;font-size:16px;font-family:var(--ui-font)}
-.mode{font-size:12px;color:var(--muted)}
-.stats{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--muted)}
-.stat{background:transparent;padding:6px 8px;border-radius:8px;display:flex;flex-direction:column;align-items:center}
-.stat-large{font-size:12px}
-.stat-value{font-weight:800;color:#0f172a;font-size:16px}
-.stat-value.small{font-size:13px}
-.controls{display:flex;gap:8px;align-items:center}
-.btn{background:linear-gradient(180deg,var(--accent),#2b64d6);color:white;border:0;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+.brand, .game-title{font-weight:700;color:#0f172a;font-size:14px;font-family:var(--ui-font)}
+.mode, .game-mode{font-size:11px;color:var(--muted)}
+.stats, .scoreboard{display:grid;grid-template-columns:repeat(6, 1fr);gap:6px;align-items:center;font-size:11px;color:var(--muted)}
+.stat{background:transparent;padding:3px 4px;border-radius:6px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.stat-label{font-size:9px;text-transform:uppercase;opacity:0.7}
+.stat-large{grid-column:span 1}
+.stat-value{font-weight:800;color:#0f172a;font-size:14px}
+.stat-value.small{font-size:12px}
+.topbar-controls, .controls{display:flex;gap:4px;align-items:center;justify-content:center}
+.btn{background:linear-gradient(180deg,var(--accent),#2b64d6);color:white;border:0;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px}
 .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.04);color:var(--muted)}
+.btn-icon{padding:6px 8px;font-size:20px;min-width:36px;display:flex;align-items:center;justify-content:center;background:none;border:none;filter:grayscale(1) brightness(0.3);opacity:0.7;transition:opacity 0.2s}
+.btn-icon:hover{opacity:1}
 
 /* Game area: fill remaining screen */
 #game-area{
   flex:1 1 auto;
   position:relative;
-  overflow:hidden;
+  overflow:visible; /* Changed from hidden to allow edge slimes to be half-visible */
   background:var(--bg);
   display:block;
-  border: 1px solid --muted;
+  border: none;
 }
 
 /* Speech bubble layer (JRPG-style) */
@@ -147,6 +156,58 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 #quest-objectives li .chk{width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,0.2); background:#fff; margin-top:2px}
 #quest-objectives li.done .chk{background:#7EE7B8; border-color:#34d399}
 #quest-objectives li .txt{flex:1}
+
+/* Side Quests Panel (appears in all game modes) */
+#side-quests-panel{
+  position:absolute;
+  left:12px; top:74px;
+  background:rgba(255,255,255,0.95);
+  color:#0f172a;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:10px;
+  padding:10px 12px;
+  box-shadow:0 12px 28px rgba(0,0,0,0.15);
+  z-index:9996;
+  min-width:220px;
+  max-width:280px;
+}
+.sq-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  padding-bottom:6px;
+  border-bottom:1px solid rgba(0,0,0,0.08);
+}
+.sq-title{font-size:13px; font-weight:800; color:#475569; font-family:var(--ui-font)}
+.sq-timer{
+  font-size:11px;
+  font-weight:700;
+  color:var(--accent);
+  background:rgba(110,168,255,0.1);
+  padding:3px 8px;
+  border-radius:6px;
+}
+.sq-missions{display:flex; flex-direction:column; gap:6px}
+.sq-mission{
+  font-size:11px;
+  padding:6px 8px;
+  background:rgba(0,0,0,0.02);
+  border-radius:6px;
+  display:flex;
+  gap:6px;
+  align-items:flex-start;
+  border:1px solid transparent;
+  transition:all 0.2s ease;
+}
+.sq-mission .icon{font-size:14px; line-height:1;}
+.sq-mission .text{flex:1; line-height:1.4;}
+.sq-mission.completed{
+  background:rgba(126,231,184,0.15);
+  border-color:rgba(52,211,153,0.3);
+  color:#059669;
+}
+.sq-mission.completed .icon{filter:grayscale(0.5);}
 
 /* Compact tooltip for objectives */
 #quest-objectives li[data-tip]{position:relative}
@@ -250,48 +311,54 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   .panel{width:92%}
   .menu-btn{font-size:13px;padding:10px}
   
-  /* Simplify topbar on mobile */
+  /* Simplify topbar on mobile - USE COLUMN LAYOUT */
   .topbar{
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
     height: auto;
-    padding: 8px 12px;
+    padding: 6px 10px;
+    gap: 8px;
   }
   
   .topbar .left{
     order: 1;
     flex: 0 0 auto;
+    text-align: center;
   }
   
   .topbar .stats{
-    order: 3;
-    flex: 1 1 100%;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-    font-size: 11px;
+    order: 2;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    font-size: 10px;
   }
   
   .stat{
-    padding: 4px 6px;
+    padding: 3px 4px;
     min-width: 0;
+    font-size: 10px;
   }
   
   .stat-value{
-    font-size: 14px;
+    font-size: 12px;
   }
   
   .stat-value.small{
-    font-size: 11px;
+    font-size: 10px;
   }
   
   .topbar .controls{
-    order: 2;
+    order: 3;
+    display: flex;
     gap: 4px;
+    justify-content: center;
   }
   
   .btn{
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 5px 8px;
+    font-size: 11px;
   }
   
   /* Quest panel responsive */
@@ -305,6 +372,40 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   /* Adjust game area for smaller screens */
   #game-area{
     min-height: 300px;
+  }
+  
+  /* On actual mobile devices, make start screen overlay the game */
+  #start-screen:not(.hidden),
+  #settings-panel:not(.hidden),
+  #time-attack-panel:not(.hidden),
+  #infinite-panel:not(.hidden),
+  #end-screen:not(.hidden) {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20000;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  
+  /* Side quests panel on mobile - make it compact and top-positioned */
+  #side-quests-panel {
+    left: 6px;
+    top: 6px;
+    min-width: auto;
+    max-width: 200px;
+    font-size: 10px;
+  }
+  
+  .sq-title {
+    font-size: 11px;
+  }
+  
+  .sq-mission {
+    font-size: 10px;
+    padding: 4px 6px;
   }
 }
 
@@ -718,6 +819,12 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   color: white;
 }
 
+.result-badge.defeated {
+  background: linear-gradient(90deg, #8b0000, #4a0000);
+  color: white;
+  border: 2px solid #ff0000;
+}
+
 .mission-mode {
   font-size: 12px;
   color: var(--muted);
@@ -984,5 +1091,106 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   
   .member-status {
     font-size: 11px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   JRPG-STYLE VISUAL EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* White dome explosion (Edge Creeper failure) */
+@keyframes white-dome-explosion {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 40%, transparent 70%);
+  }
+  50% {
+    transform: scale(4);
+    opacity: 0.8;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 40%, transparent 70%);
+  }
+  100% {
+    transform: scale(8);
+    opacity: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.2) 40%, transparent 70%);
+  }
+}
+
+/* White lightning fill (Tendril damage) */
+@keyframes lightning-fill {
+  0% {
+    filter: brightness(1);
+  }
+  20% {
+    filter: brightness(5) saturate(0);
+  }
+  40% {
+    filter: brightness(1);
+  }
+  60% {
+    filter: brightness(4) saturate(0);
+  }
+  80% {
+    filter: brightness(1);
+  }
+  100% {
+    filter: brightness(3) saturate(0);
+  }
+}
+
+/* Red fade-out (Enemy defeated - FF6/Chrono Trigger style) */
+@keyframes red-fade-death {
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+    opacity: 1;
+  }
+  40% {
+    filter: hue-rotate(30deg) brightness(1.1);
+    opacity: 0.9;
+  }
+  70% {
+    filter: hue-rotate(60deg) brightness(0.9) saturate(1.5);
+    opacity: 0.6;
+  }
+  100% {
+    filter: hue-rotate(90deg) brightness(0.6) saturate(2);
+    opacity: 0;
+  }
+}
+
+.exploding {
+  animation: white-dome-explosion 0.4s ease-out forwards;
+  pointer-events: none;
+}
+
+.lightning-flash {
+  animation: lightning-fill 0.5s ease-out forwards;
+}
+
+.dying-red {
+  animation: red-fade-death 0.6s ease-out forwards;
+}
+
+/* Creeper explosion animations */
+@keyframes creeperExplosionClick {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes creeperExplosionBreach {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
   }
 }
