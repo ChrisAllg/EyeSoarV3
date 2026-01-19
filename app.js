@@ -2666,20 +2666,26 @@
     container.style.zIndex = '10000';
     container.style.pointerEvents = 'auto';
     container.style.cursor = 'default';
-    container.style.width = '48px';
-    container.style.height = '24px';
+    // Container size will be set based on edge orientation below
     
     // Create SVG slime shape (organic blob with bell curve profile)
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '48');
-    svg.setAttribute('height', '16');
+    // SVG dimensions depend on edge orientation
+    const isVertical = (side === 1 || side === 3);
+    svg.setAttribute('width', isVertical ? '16' : '48');
+    svg.setAttribute('height', isVertical ? '48' : '16');
     svg.style.overflow = 'visible';
     svg.style.pointerEvents = 'none';
     svg.style.position = 'absolute';
     
     // Create organic blob shape using path (bell curve profile)
     const blob = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const d = 'M 4,8 Q 12,2 24,2 Q 36,2 44,8 Q 36,14 24,14 Q 12,14 4,8 Z';
+    
+    // Use different path for horizontal vs vertical edges
+    const d = isVertical 
+      ? 'M 8,4 Q 2,12 2,24 Q 2,36 8,44 Q 14,36 14,24 Q 14,12 8,4 Z'  // Vertical blob: 16w × 48h
+      : 'M 4,8 Q 12,2 24,2 Q 36,2 44,8 Q 36,14 24,14 Q 12,14 4,8 Z';  // Horizontal blob: 48w × 16h
+    
     blob.setAttribute('d', d);
     blob.setAttribute('fill', 'rgb(255,255,255)');
     blob.setAttribute('opacity', '1.0');
@@ -2701,6 +2707,8 @@
     if (side === 0) {
       // TOP EDGE
       axis = 'horizontal';
+      container.style.width = '48px';
+      container.style.height = '24px';
       container.style.top = '0';
       container.style.left = startPos + 'px';
       svg.style.top = '-8px';
@@ -2708,15 +2716,17 @@
     } else if (side === 1) {
       // RIGHT EDGE
       axis = 'vertical';
+      container.style.width = '20px';
+      container.style.height = '48px';
       container.style.right = '0';
       container.style.top = startPos + 'px';
       svg.style.right = '-8px';
-      svg.style.top = '-12px';
-      svg.style.transform = 'rotate(90deg)';
-      svg.style.transformOrigin = 'right top';
+      svg.style.top = '0';
     } else if (side === 2) {
       // BOTTOM EDGE
       axis = 'horizontal';
+      container.style.width = '48px';
+      container.style.height = '24px';
       container.style.bottom = '0';
       container.style.left = startPos + 'px';
       svg.style.bottom = '-8px';
@@ -2724,20 +2734,19 @@
     } else {
       // LEFT EDGE
       axis = 'vertical';
+      container.style.width = '20px';
+      container.style.height = '48px';
       container.style.left = '0';
       container.style.top = startPos + 'px';
       svg.style.left = '-8px';
-      svg.style.top = '-12px';
-      svg.style.transform = 'rotate(90deg)';
-      svg.style.transformOrigin = 'left top';
+      svg.style.top = '0';
     }
     
     currentPos = startPos;
     targetPos = startPos;
     
     // Apply initial scale (starts small)
-    const rotationPart = (axis === 'vertical' ? 'rotate(90deg) ' : '');
-    svg.style.transform = rotationPart + 'scale(0.25)';
+    svg.style.transform = 'scale(0.25)';
     
     gameArea.appendChild(container);
     playEdgeCreeperSpawnSound();
@@ -2860,16 +2869,15 @@
       const scale = 0.25 + (0.75 * progress);
       
       // SHAPE ANIMATION
-      const rotationPart = (axis === 'vertical' ? 'rotate(90deg) ' : '');
       if (isStretching) {
         const stretchProgress = Math.min(1, (targetPos - currentPos) / 8);
         const scaleX = scale * (1 + 0.5 * stretchProgress);
         const scaleY = scale * (1 - 0.3 * stretchProgress);
-        svg.style.transform = rotationPart + `scale(${scaleX}, ${scaleY})`;
+        svg.style.transform = `scale(${scaleX}, ${scaleY})`;
       } else {
         const pulsePhase = Math.sin((elapsed / 1000) * Math.PI * 2);
         const pulseScale = scale * (1 + pulsePhase * 0.06);
-        svg.style.transform = rotationPart + `scale(${pulseScale})`;
+        svg.style.transform = `scale(${pulseScale})`;
       }
       
       // Update position
